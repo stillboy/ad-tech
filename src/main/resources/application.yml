@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: adtech
+
+  data:
+    mongodb:
+      database: adtech
+      port: 27017
+      host: localhost
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/adtech?serverTimezone=UTC
+    username: root
+    password: qnwk052911!
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
