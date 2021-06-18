@@ -34,9 +34,8 @@ public class AdvertisementImage {
     private Advertisement advertisement;
 
     @Builder
-    public AdvertisementImage(String name, String extension, Long size, String path) {
-        this.name = name;
-        this.extension = extension;
+    public AdvertisementImage(String name, Long size, String path) {
+        splitNameAndExtension(name);
         this.size = size;
         this.path = path;
     }
@@ -44,5 +43,25 @@ public class AdvertisementImage {
     public void bindAdvertisement(Advertisement advertisement) {
         if(this.advertisement != null) return;
         this.advertisement = advertisement;
+    }
+
+    public void editNameAndExtension(String fileName) {
+        if(fileName == null || fileName.trim().length() == 0) return;
+        splitNameAndExtension(fileName);
+    }
+
+    public void changeSize(Long size) {
+        if(size == null || size <= 0) return;
+        this.size = size;
+    }
+
+    public String getFullPathName() {
+        return path + name + "." + extension;
+    }
+
+    private void splitNameAndExtension(String fileName) {
+        int lastDot = fileName.lastIndexOf('.');
+        this.name = fileName.substring(0, lastDot);
+        this.extension = fileName.substring(lastDot+1, fileName.length());
     }
 }

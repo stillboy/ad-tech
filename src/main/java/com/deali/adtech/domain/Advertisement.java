@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -41,7 +42,7 @@ public class Advertisement {
     private ExposeCount exposeCount;
 
     @OneToMany(mappedBy = "advertisement", fetch = FetchType.LAZY)
-    private List<AdvertisementImage> images;
+    private List<AdvertisementImage> images = new ArrayList<>();
 
     @Builder
     public Advertisement(String title, Integer winningBid, LocalDateTime createdAt, LocalDateTime expiryDate) {
@@ -51,5 +52,19 @@ public class Advertisement {
         this.modifiedAt = createdAt;
         this.expiryDate = expiryDate;
         this.status = AdvertisementStatus.WAITING;
+    }
+
+    public void editTitle(String title) {
+        if(title == null || title.trim().length() == 0) return;
+        this.title = title;
+    }
+
+    public void changeWinningBid(Integer winningBid) {
+        if(winningBid == null || winningBid < 1 || winningBid > 10) return;
+        this.winningBid = winningBid;
+    }
+
+    public void updateModifiedAt(LocalDateTime modifiedAt) {
+
     }
 }

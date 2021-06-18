@@ -15,9 +15,6 @@ public interface AdvertisementMapper {
 
     Advertisement dtoToEntity(RequestCreateAdvertisement requestCreateAdvertisement);
 
-    @Mappings({
-            @Mapping(source = "path", target = "path"),
-            @Mapping(source = "file.contentType", target = "extension")
-    })
+    @Mapping(source = "path", target = "path")
     AdvertisementImage fileToEntity(MultipartFile file, String path);
 }
