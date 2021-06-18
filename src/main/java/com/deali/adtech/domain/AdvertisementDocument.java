@@ -9,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
 @Document(collection = "advertisement")
 public class AdvertisementDocument {

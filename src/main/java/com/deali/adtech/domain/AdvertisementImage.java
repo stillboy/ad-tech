@@ -1,12 +1,16 @@
 package com.deali.adtech.domain;
 
 
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name="ADVERTISEMENT_IMAGE")
 public class AdvertisementImage {
     @Id
@@ -28,4 +32,17 @@ public class AdvertisementImage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ADVERTISEMENT_ID", nullable = false)
     private Advertisement advertisement;
+
+    @Builder
+    public AdvertisementImage(String name, String extension, Long size, String path) {
+        this.name = name;
+        this.extension = extension;
+        this.size = size;
+        this.path = path;
+    }
+
+    public void bindAdvertisement(Advertisement advertisement) {
+        if(this.advertisement != null) return;
+        this.advertisement = advertisement;
+    }
 }

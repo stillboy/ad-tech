@@ -1,5 +1,7 @@
 package com.deali.adtech.domain;
 
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +11,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "advertisement")
 public class Advertisement {
     @Id
@@ -39,4 +42,14 @@ public class Advertisement {
 
     @OneToMany(mappedBy = "advertisement", fetch = FetchType.LAZY)
     private List<AdvertisementImage> images;
+
+    @Builder
+    public Advertisement(String title, Integer winningBid, LocalDateTime createdAt, LocalDateTime expiryDate) {
+        this.title = title;
+        this.winningBid = winningBid;
+        this.createdAt = createdAt;
+        this.modifiedAt = createdAt;
+        this.expiryDate = expiryDate;
+        this.status = AdvertisementStatus.WAITING;
+    }
 }

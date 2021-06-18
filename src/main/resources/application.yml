@@ -21,3 +21,7 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+
+image:
+  advertisement:
+    default-path: /Users/admin/temp-image/
