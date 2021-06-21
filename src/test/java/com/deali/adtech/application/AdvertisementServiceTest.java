@@ -6,6 +6,7 @@ import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
+import com.deali.adtech.presentation.dto.RequestPostPoneAdvertisement;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,13 +21,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.*;
 
 @Transactional
 @SpringBootTest
-class AdvertisementServiceImplTest {
+class AdvertisementServiceTest {
     private static final String TEST_PATH = "/Users/admin/temp-image/";
     @Autowired
     private AdvertisementService advertisementServiceImpl;
@@ -114,6 +116,9 @@ class AdvertisementServiceImplTest {
         assertThat(result)
                 .hasFieldOrPropertyWithValue("title", request.getTitle())
                 .hasFieldOrPropertyWithValue("winningBid", request.getWinningBid());
+
+        assertThat(result.getCreatedAt())
+                .isNotEqualTo(result.getModifiedAt());
     }
 
     @Test
@@ -128,7 +133,11 @@ class AdvertisementServiceImplTest {
         request.setWinningBid(7);
 
         String fileName = "editedImage.jpg";
-        request.setNewImage(buildMockMultipartFile(fileName));
+        int lastDot = fileName.lastIndexOf(".");
+        String extension = fileName.substring(lastDot+1, fileName.length());
+
+        MultipartFile mockMultipartFile = buildMockMultipartFile(fileName);
+        request.setNewImage(mockMultipartFile);
         /* when */
         advertisementServiceImpl.editAdvertisement(request);
         entityManager.flush();
@@ -141,6 +150,46 @@ class AdvertisementServiceImplTest {
         assertThat(result)
                 .hasFieldOrPropertyWithValue("title", request.getTitle())
                 .hasFieldOrPropertyWithValue("winningBid", request.getWinningBid());
+
+        assertThat(result.getCreatedAt())
+                .isNotEqualTo(result.getModifiedAt());
+
+        assertThat(result.getImages().size())
+                .isEqualTo(1);
+
+        assertThat(result.getImages().get(0))
+                .hasFieldOrPropertyWithValue("extension", extension)
+                .hasFieldOrPropertyWithValue("size", mockMultipartFile.getSize());
+    }
+
+    @Test
+    @DisplayName("소재 기간 연기 성공 테스트 케이스")
+    public void postpone_advertisement_success_test() {
+        /* given */
+        Advertisement target = advertisementRepository.findAll().get(0);
+
+        RequestPostPoneAdvertisement request = new RequestPostPoneAdvertisement();
+        request.setAdvertisementId(target.getId());
+        request.setExposureDate(LocalDateTime.of(2021,6,20,12,00));
+
+        Duration originDuration = Duration.between(target.getExposureDate(), target.getExpiryDate());
+
+        /* when */
+        advertisementServiceImpl.postponeAdvertisement(request);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        target = advertisementRepository.findById(request.getAdvertisementId())
+                .orElseThrow(EntityNotFoundException::new);
+
+        /* then */
+        System.out.println("DURATION " + originDuration.toMinutes());
+        assertThat(target)
+                .hasFieldOrPropertyWithValue("exposureDate", request.getExposureDate());
+
+        assertThat(Duration.between(target.getExposureDate(), target.getExpiryDate()))
+                .isEqualTo(originDuration);
     }
 
     private MultipartFile buildMockMultipartFile(String fileName) throws Exception{

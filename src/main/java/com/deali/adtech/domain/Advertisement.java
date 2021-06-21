@@ -2,11 +2,11 @@ package com.deali.adtech.domain;
 
 import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
 import com.deali.adtech.infrastructure.exception.InvalidPostponeRequestException;
-import lombok.AccessLevel;
+import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.tomcat.jni.Local;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.Duration;
@@ -30,15 +30,19 @@ public class Advertisement {
     private Integer winningBid;
 
     @Column(name="CREATED_AT", nullable = false, updatable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:zz")
     private LocalDateTime createdAt;
 
     @Column(name="MODIFIED_AT", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:zz")
     private LocalDateTime modifiedAt;
 
     @Column(name="EXPIRY_DATE", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm")
     private LocalDateTime expiryDate;
 
     @Column(name="EXPOSURE_DATE", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm")
     private LocalDateTime exposureDate;
 
     @Column(name="STATUS", nullable = false)
@@ -84,30 +88,32 @@ public class Advertisement {
 
         editTitle(title);
         changeWinningBid(winningBid);
+        this.modifiedAt = LocalDateTime.now();
     }
 
-    //TODO:: 수정일자, 등록일자, 노출일자 생각해보기 + switch 문으로 처리
-    public void postpone() {
-        /**
-         * 1. 삭제된 광고는 연기시킬 수 없음
-         * 2. 광고중인 광고를 연기시킬 경우 현재 요청한 시간 부터 광고 기간까지의 차이만큼 다시 더해줘야한다.
-         * 3. 광고 기간이 만료된 광고도 연기시킬 수 없음
-         * */
-        if(status == AdvertisementStatus.DELETED || status == AdvertisementStatus.EXPIRATION) {
-            throw new InvalidPostponeRequestException();
+    public void postpone(LocalDateTime newExposureDate) {
+        switch (status) {
+            case EXPIRATION:
+            case DELETED:
+                throw new InvalidPostponeRequestException();
+            case WAITING:
+            case ADVERTISING:
+                calculateRemainingTime(newExposureDate);
         }
-
-        LocalDateTime currentTime = LocalDateTime.now();
-
-        if(status == AdvertisementStatus.ADVERTISING) {
-            calculateRemainingTime(currentTime);
-        }
-
-        modifiedAt = currentTime;
     }
 
-    protected void calculateRemainingTime(LocalDateTime currentTime) {
+    public void extend() {
 
+    }
+
+    private void calculateRemainingTime(LocalDateTime newExposureDate) {
+        if(newExposureDate.isBefore(exposureDate)) {
+            throw new InvalidExposureDateException();
+        }
+
+        Duration duration = Duration.between(exposureDate, expiryDate);
+        this.exposureDate = newExposureDate;
+        this.expiryDate = newExposureDate.plus(duration);
     }
 
     protected void initCreationDate() {

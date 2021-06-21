@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.UUID;
@@ -67,11 +68,39 @@ public class AdvertisementImage {
         this.extension = fileName.substring(lastDot+1, fileName.length());
     }
 
-    public void uploadImageFile(String path, byte[] fileBytes) {
-        try(FileOutputStream fileOutputStream = new FileOutputStream(path + name)) {
+    public void uploadImageFile(byte[] fileBytes) {
+        if(path == null || fileBytes.length <= 0) return;
+
+        //TODO::path+name+"."+extension => 따로 빼기
+        try(FileOutputStream fileOutputStream =
+                    new FileOutputStream(path+name+"."+extension)) {
             fileOutputStream.write(fileBytes);
         } catch(IOException exception) {
             throw new RuntimeException();
         }
+    }
+
+    public void exchangeImage(String fileName, Long newSize, byte[] newFileBytes) {
+        //TODO::익셉션 정의 필요, 파일 삭제 실패 예외
+        if(!removeImageFile()) {
+            throw new RuntimeException();
+        }
+
+        editNameAndExtension(fileName);
+        changeSize(newSize);
+
+        uploadImageFile(newFileBytes);
+    }
+
+    private boolean removeImageFile() {
+        System.out.println(">>>>>>>"+getFullPathName());
+        File file = new File(getFullPathName());
+
+        //TODO::익셉션 정의 필요, 파일이 존재하지 않을 시
+        if(!file.exists()) {
+            throw new RuntimeException();
+        }
+
+        return file.delete();
     }
 }
