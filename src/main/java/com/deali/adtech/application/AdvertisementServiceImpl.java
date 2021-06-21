@@ -46,14 +46,21 @@ public class AdvertisementServiceImpl implements AdvertisementService{
 
         advertisement = advertisementRepository.save(advertisement);
 
-        uploadImage(requestCreateAdvertisement.getImage());
-
         AdvertisementImage advertisementImage = AdvertisementMapper.INSTANCE
                 .fileToEntity(requestCreateAdvertisement.getImage(), defaultPath);
 
         advertisementImage.bindAdvertisement(advertisement);
 
         advertisementImage = imageRepository.save(advertisementImage);
+
+        try {
+
+            advertisementImage.uploadImageFile(defaultPath,
+                    requestCreateAdvertisement.getImage().getBytes());
+
+        } catch (IOException exception) {
+            throw new RuntimeException();
+        }
 
         ExposeCount exposeCount = ExposeCount.builder()
                 .advertisement(advertisement)
@@ -66,22 +73,11 @@ public class AdvertisementServiceImpl implements AdvertisementService{
 
     @Override
     public void editAdvertisement(RequestEditAdvertisement requestEditAdvertisement) {
-        //TODO:: 삭제된 광고는 수정할 수 없음, 수정일이 광고를 수정한 날짜? 혹은 내가 노출기간을 변경한 날짜?
-        Advertisement advertisement = advertisementRepository
-                .findById(requestEditAdvertisement.getId())
-                .orElseThrow(EntityNotFoundException::new);
+        Advertisement advertisement = getAdvertisementEntity(requestEditAdvertisement.getId());
 
-        if(advertisement.getStatus() == AdvertisementStatus.DELETED) {
-            throw new AlreadyRemovedAdvertisementException();
-        }
+        advertisement.editAdvertisement(requestEditAdvertisement.getTitle(),
+                requestEditAdvertisement.getWinningBid());
 
-        advertisement.editTitle(requestEditAdvertisement.getTitle());
-        advertisement.changeWinningBid(requestEditAdvertisement.getWinningBid());
-        advertisement.updateModifiedAt(LocalDateTime.now());
-
-        //TODO::수정된 애들만 따로 조회할 수 있게 할까 아니면 그냥 한꺼번에 다 반영시켜버릴까? => 일단 한꺼번에 다 반영
-
-        //TODO:: 수정할 이미지가 존재하면 분기 처리
         MultipartFile newImage = requestEditAdvertisement.getNewImage();
 
         if(newImage != null && !newImage.isEmpty()) {
@@ -91,23 +87,12 @@ public class AdvertisementServiceImpl implements AdvertisementService{
 
     @Override
     public void postponeAdvertisement(Long advertisementId) {
-        Advertisement advertisement = advertisementRepository.findById(advertisementId)
-                .orElseThrow(EntityNotFoundException::new);
+        Advertisement advertisement = getAdvertisementEntity(advertisementId);
 
-        //TODO::고려사항
-        /**
-         * 1. 삭제된 광고는 연기시킬 수 없음
-         * 2. 광고중인 광고를 연기시킬 경우 현재 요청한 시간 부터 광고 기간까지의 차이만큼 다시 더해줘야한다.
-         * 3. 광고 기간이 만료된 광고도 연기시킬 수 없음
-         * */
-        if(advertisement.getStatus() == AdvertisementStatus.DELETED ||
-                advertisement.getStatus() == AdvertisementStatus.EXPIRATION) {
-            throw new InvalidPostponeRequestException();
-        }
-
-
+        advertisement.postpone();
     }
 
+    //TODO::이미지 처리 관련 로직 분리시키기
     protected void uploadImage(MultipartFile image) {
         try(FileOutputStream outputStream =
                     new FileOutputStream(defaultPath + image.getName())) {
@@ -142,5 +127,9 @@ public class AdvertisementServiceImpl implements AdvertisementService{
         }
 
         return file.delete();
+    }
+
+    private Advertisement getAdvertisementEntity(Long key) {
+        return advertisementRepository.findById(key).orElseThrow(EntityNotFoundException::new);
     }
 }

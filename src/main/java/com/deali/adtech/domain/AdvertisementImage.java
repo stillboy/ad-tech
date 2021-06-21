@@ -1,12 +1,13 @@
 package com.deali.adtech.domain;
 
-
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -61,7 +62,16 @@ public class AdvertisementImage {
 
     private void splitNameAndExtension(String fileName) {
         int lastDot = fileName.lastIndexOf('.');
-        this.name = fileName.substring(0, lastDot);
+
+        this.name = UUID.randomUUID().toString();
         this.extension = fileName.substring(lastDot+1, fileName.length());
+    }
+
+    public void uploadImageFile(String path, byte[] fileBytes) {
+        try(FileOutputStream fileOutputStream = new FileOutputStream(path + name)) {
+            fileOutputStream.write(fileBytes);
+        } catch(IOException exception) {
+            throw new RuntimeException();
+        }
     }
 }

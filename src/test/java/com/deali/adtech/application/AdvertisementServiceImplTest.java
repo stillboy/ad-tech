@@ -40,10 +40,10 @@ class AdvertisementServiceImplTest {
         RequestCreateAdvertisement request = new RequestCreateAdvertisement();
         request.setTitle("셋업 데이터");
         request.setWinningBid(5);
-        request.setCreatedAt(LocalDateTime.of(2021,6,18,12,00));
+        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
         request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
 
-        String fileName = "temp.jpg";
+        String fileName = "temp2.jpg";
         MultipartFile multipartFile = buildMockMultipartFile(fileName);
         request.setImage(multipartFile);
 
@@ -59,13 +59,11 @@ class AdvertisementServiceImplTest {
         RequestCreateAdvertisement request = new RequestCreateAdvertisement();
         request.setTitle("테스트1");
         request.setWinningBid(1);
-        request.setCreatedAt(LocalDateTime.of(2021,6,18,12,00));
+        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
         request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
 
-        String fileName = "temp.jpg";
-        MultipartFile multipartFile =
-                new MockMultipartFile(fileName, new FileInputStream(new File(TEST_PATH+"temp.jpg")));
-
+        String fileName = "temp2.jpg";
+        MultipartFile multipartFile = buildMockMultipartFile(fileName);
         request.setImage(multipartFile);
 
         /* when */
@@ -81,19 +79,15 @@ class AdvertisementServiceImplTest {
         assertThat(target)
                 .hasFieldOrPropertyWithValue("title", request.getTitle())
                 .hasFieldOrPropertyWithValue("winningBid", request.getWinningBid())
-                .hasFieldOrPropertyWithValue("createdAt", request.getCreatedAt())
-                .hasFieldOrPropertyWithValue("modifiedAt", request.getCreatedAt())
                 .hasFieldOrPropertyWithValue("status", AdvertisementStatus.WAITING);
 
         assertThat(target.getExposeCount())
                 .hasFieldOrPropertyWithValue("exposeCount", 0L);
 
         int lastDot = fileName.lastIndexOf(".");
-        String name = fileName.substring(0, lastDot);
         String extension = fileName.substring(lastDot+1, fileName.length());
 
         assertThat(target.getImages().get(0))
-                .hasFieldOrPropertyWithValue("name", name)
                 .hasFieldOrPropertyWithValue("extension", extension);
     }
 
