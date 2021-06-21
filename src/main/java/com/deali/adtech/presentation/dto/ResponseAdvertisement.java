@@ -41,4 +41,17 @@ public class ResponseAdvertisement {
         this.exposeCount = exposeCount;
     }
 
+    @QueryProjection
+    public ResponseAdvertisement(Long id, String title, Integer WinningBid, LocalDateTime createdAt,
+                                 LocalDateTime modifiedAt, LocalDateTime exposureDate,
+                                 LocalDateTime expiryDate, AdvertisementStatus status) {
+        this.id = id;
+        this.title = title;
+        this.winningBid = winningBid;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+        this.exposureDate = exposureDate;
+        this.expiryDate = expiryDate;
+        this.status = status.toString();
+    }
 }

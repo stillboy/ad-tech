@@ -4,9 +4,11 @@ import com.deali.adtech.domain.AdvertisementImage;
 import com.deali.adtech.presentation.dto.AdvertisementSearchCondition;
 import com.deali.adtech.presentation.dto.QResponseAdvertisement;
 import com.deali.adtech.presentation.dto.ResponseAdvertisement;
+import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -26,7 +28,18 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
 
     @Override
     public Page<ResponseAdvertisement> searchAdvertisement(Pageable pageable, AdvertisementSearchCondition searchCondition) {
-        return null;
+        //TODO::소팅, 검색조건 생각
+        QueryResults<ResponseAdvertisement> result = queryFactory
+                .select(new QResponseAdvertisement(advertisement.id, advertisement.title,
+                        advertisement.winningBid, advertisement.createdAt, advertisement.modifiedAt,
+                        advertisement.exposureDate, advertisement.expiryDate, advertisement.status))
+                .from(advertisement)
+                .orderBy(advertisement.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        return new PageImpl<ResponseAdvertisement>(result.getResults(), pageable, result.getTotal());
     }
 
     @Override
