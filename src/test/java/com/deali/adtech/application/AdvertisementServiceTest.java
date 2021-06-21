@@ -6,6 +6,7 @@ import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
+import com.deali.adtech.presentation.dto.RequestExtendAdvertisement;
 import com.deali.adtech.presentation.dto.RequestPostPoneAdvertisement;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
@@ -185,12 +186,37 @@ class AdvertisementServiceTest {
                 .orElseThrow(EntityNotFoundException::new);
 
         /* then */
-        System.out.println("DURATION " + originDuration.toMinutes());
         assertThat(target)
                 .hasFieldOrPropertyWithValue("exposureDate", request.getExposureDate());
 
         assertThat(Duration.between(target.getExposureDate(), target.getExpiryDate()))
                 .isEqualTo(originDuration);
+    }
+
+    @Test
+    @DisplayName("소재 기간 연장 선공 테스트 케이스")
+    public void extend_advertisement_success_test() {
+        /* given */
+        Advertisement target = advertisementRepository.findAll().get(0);
+
+        LocalDateTime newExpiryDate = LocalDateTime.of(2021,7,25,12,00);
+
+        RequestExtendAdvertisement request = new RequestExtendAdvertisement();
+        request.setAdvertisementId(target.getId());
+        request.setExpiryDate(newExpiryDate);
+
+        /* when */
+        advertisementServiceImpl.extendAdvertisement(request);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        target = advertisementRepository.findById(target.getId())
+                .orElseThrow(EntityNotFoundException::new);
+
+        /* then */
+        assertThat(target)
+                .hasFieldOrPropertyWithValue("expiryDate", newExpiryDate);
     }
 
     @Test

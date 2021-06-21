@@ -78,6 +78,7 @@ public class Advertisement {
     }
 
     public void updateModifiedAt(LocalDateTime modifiedAt) {
+        if(modifiedAt == null || modifiedAt.isBefore(this.modifiedAt)) return;
         this.modifiedAt = modifiedAt;
     }
 
@@ -89,30 +90,38 @@ public class Advertisement {
 
         editTitle(title);
         changeWinningBid(winningBid);
-        this.modifiedAt = LocalDateTime.now();
+        updateModifiedAt(LocalDateTime.now());
     }
 
     public void postpone(LocalDateTime newExposureDate) {
         switch (status) {
-            case EXPIRATION:
-            case DELETED:
-                throw new InvalidPostponeRequestException();
             case WAITING:
             case ADVERTISING:
                 calculateRemainingTime(newExposureDate);
+                status = AdvertisementStatus.WAITING;
                 break;
+            case EXPIRED:
+            case DELETED:
+                throw new InvalidPostponeRequestException();
         }
     }
 
     public void extend(LocalDateTime newExpiryDate) {
+        if(newExpiryDate.isBefore(exposureDate) || newExpiryDate.isBefore(expiryDate)) {
+            throw new RuntimeException();
+        }
+
         switch (status) {
-            case EXPIRATION:
-            case DELETED:
-                throw new RuntimeException();
             case WAITING:
             case ADVERTISING:
-
+                this.expiryDate = newExpiryDate;
                 break;
+            case EXPIRED:
+                this.expiryDate = newExpiryDate;
+                this.status = AdvertisementStatus.WAITING;
+                break;
+            case DELETED:
+                throw new InvalidExposureDateException();
         }
     }
 
@@ -124,7 +133,6 @@ public class Advertisement {
         status = AdvertisementStatus.DELETED;
     }
 
-    //TODO:: 광고 연기, 갱신에 대한 중복 로직 처리 개선방안
     private Duration calculateRemainingTime(LocalDateTime newExposureDate) {
         if(newExposureDate.isBefore(exposureDate)) {
             throw new InvalidExposureDateException();
