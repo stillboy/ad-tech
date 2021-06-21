@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -190,6 +191,23 @@ class AdvertisementServiceTest {
 
         assertThat(Duration.between(target.getExposureDate(), target.getExpiryDate()))
                 .isEqualTo(originDuration);
+    }
+
+    @Test
+    @DisplayName("소재 삭제 성공 테스트 케이스")
+    public void remove_advertisement_success_test() {
+        Advertisement advertisement = advertisementRepository.findAll().get(0);
+        Long targetId = advertisement.getId();
+
+        advertisementServiceImpl.removeAdvertisement(advertisement.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        Advertisement target = advertisementRepository.findById(targetId)
+                .orElseThrow(EntityNotFoundException::new);
+
+        assertThat(target)
+                .hasFieldOrPropertyWithValue("status", AdvertisementStatus.DELETED);
     }
 
     private MultipartFile buildMockMultipartFile(String fileName) throws Exception{

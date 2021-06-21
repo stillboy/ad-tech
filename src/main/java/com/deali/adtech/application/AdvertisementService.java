@@ -1,9 +1,6 @@
 package com.deali.adtech.application;
 
-import com.deali.adtech.domain.Advertisement;
-import com.deali.adtech.domain.AdvertisementImage;
-import com.deali.adtech.domain.AdvertisementStatus;
-import com.deali.adtech.domain.ExposeCount;
+import com.deali.adtech.domain.*;
 import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
 import com.deali.adtech.infrastructure.exception.InvalidPostponeRequestException;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
@@ -12,10 +9,14 @@ import com.deali.adtech.infrastructure.repository.ExposeCountRepository;
 import com.deali.adtech.infrastructure.util.AdvertisementMapper;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
+import com.deali.adtech.presentation.dto.RequestExtendAdvertisement;
 import com.deali.adtech.presentation.dto.RequestPostPoneAdvertisement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.lang.NonNull;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +36,7 @@ public class AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementImageRepository imageRepository;
     private final ExposeCountRepository exposeCountRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${image.advertisement.default-path}")
     private String defaultPath;
@@ -70,7 +72,7 @@ public class AdvertisementService {
         return advertisement.getId();
     }
 
-    public void editAdvertisement(RequestEditAdvertisement requestEditAdvertisement) {
+    public void editAdvertisement(@NonNull RequestEditAdvertisement requestEditAdvertisement) {
         Advertisement advertisement = getAdvertisementEntity(requestEditAdvertisement.getId());
 
         advertisement.editAdvertisement(requestEditAdvertisement.getTitle(),
@@ -88,12 +90,22 @@ public class AdvertisementService {
         }
     }
 
-    public void postponeAdvertisement(RequestPostPoneAdvertisement requestPostPoneAdvertisement) {
+    public void postponeAdvertisement(@NonNull RequestPostPoneAdvertisement requestPostPoneAdvertisement) {
         Advertisement advertisement = getAdvertisementEntity(requestPostPoneAdvertisement.getAdvertisementId());
         advertisement.postpone(requestPostPoneAdvertisement.getExposureDate());
     }
 
-    //TODO::광고 노출 시작 일자 변경, 광고 노출 만료 일자 변경
+    public void extendAdvertisement(@NonNull RequestExtendAdvertisement requestExtendAdvertisement) {
+        Advertisement advertisement = getAdvertisementEntity(requestExtendAdvertisement.getAdvertisementId());
+        advertisement.extend(requestExtendAdvertisement.getExpiryDate());
+    }
+
+    public void removeAdvertisement(@NonNull Long advertisementId) {
+        Advertisement advertisement = getAdvertisementEntity(advertisementId);
+        advertisement.remove();
+        //TODO::이것도 나중에는 분리하는게 맞을거 같은데?
+        eventPublisher.publishEvent(new AdvertisementRemovedEvent(advertisement));
+    }
 
     private Advertisement getAdvertisementEntity(Long key) {
         return advertisementRepository.findById(key).orElseThrow(EntityNotFoundException::new);

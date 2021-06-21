@@ -3,6 +3,7 @@ package com.deali.adtech.domain;
 import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
 import com.deali.adtech.infrastructure.exception.InvalidPostponeRequestException;
 import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
+import com.deali.adtech.infrastructure.exception.InvalidRemoveRqeustException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -99,14 +100,32 @@ public class Advertisement {
             case WAITING:
             case ADVERTISING:
                 calculateRemainingTime(newExposureDate);
+                break;
         }
     }
 
-    public void extend() {
+    public void extend(LocalDateTime newExpiryDate) {
+        switch (status) {
+            case EXPIRATION:
+            case DELETED:
+                throw new RuntimeException();
+            case WAITING:
+            case ADVERTISING:
 
+                break;
+        }
     }
 
-    private void calculateRemainingTime(LocalDateTime newExposureDate) {
+    public void remove() {
+        if(status == AdvertisementStatus.DELETED) {
+            throw new InvalidRemoveRqeustException();
+        }
+
+        status = AdvertisementStatus.DELETED;
+    }
+
+    //TODO:: 광고 연기, 갱신에 대한 중복 로직 처리 개선방안
+    private Duration calculateRemainingTime(LocalDateTime newExposureDate) {
         if(newExposureDate.isBefore(exposureDate)) {
             throw new InvalidExposureDateException();
         }
@@ -114,6 +133,8 @@ public class Advertisement {
         Duration duration = Duration.between(exposureDate, expiryDate);
         this.exposureDate = newExposureDate;
         this.expiryDate = newExposureDate.plus(duration);
+
+        return duration;
     }
 
     protected void initCreationDate() {
