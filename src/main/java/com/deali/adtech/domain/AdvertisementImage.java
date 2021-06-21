@@ -71,7 +71,6 @@ public class AdvertisementImage {
     public void uploadImageFile(byte[] fileBytes) {
         if(path == null || fileBytes.length <= 0) return;
 
-        //TODO::path+name+"."+extension => 따로 빼기
         try(FileOutputStream fileOutputStream =
                     new FileOutputStream(path+name+"."+extension)) {
             fileOutputStream.write(fileBytes);

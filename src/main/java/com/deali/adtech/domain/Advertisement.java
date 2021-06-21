@@ -54,7 +54,7 @@ public class Advertisement {
     private ExposeCount exposeCount;
 
     @OneToMany(mappedBy = "advertisement", fetch = FetchType.LAZY)
-    private List<AdvertisementImage> images = new ArrayList<>();
+    private List<AdvertisementImage> images;
 
     @Builder
     public Advertisement(String title, Integer winningBid, LocalDateTime expiryDate,

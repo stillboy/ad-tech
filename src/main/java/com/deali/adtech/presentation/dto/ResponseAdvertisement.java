@@ -3,6 +3,7 @@ package com.deali.adtech.presentation.dto;
 import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.domain.ExposeCount;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -24,5 +25,20 @@ public class ResponseAdvertisement {
     private String status;
     private Long exposeCount;
     private List<String> images;
+
+    @QueryProjection
+    public ResponseAdvertisement(Long id, String title,Integer winningBid, LocalDateTime createdAt,
+                                 LocalDateTime modifiedAt, LocalDateTime exposureDate,
+                                 LocalDateTime expiryDate, AdvertisementStatus status, Long exposeCount) {
+        this.id = id;
+        this.title = title;
+        this.winningBid = winningBid;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+        this.exposureDate = exposureDate;
+        this.expiryDate = expiryDate;
+        this.status = status.toString();
+        this.exposeCount = exposeCount;
+    }
 
 }

@@ -12,16 +12,15 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @RequiredArgsConstructor
 @Component
-public class AdvertisementDocumentHandler implements AdvertisementNotifier{
+public class AdvertisementDocumentHandler {
     private final MongoTemplate mongoTemplate;
 
-    @Override
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void removeAdvertisementDocument(AdvertisementRemovedEvent event) {
         Advertisement advertisement = event.getAdvertisement();
 
         Criteria criteria = new Criteria("advertisementId")
-                                    .is(advertisement.getId());
+                .is(advertisement.getId());
 
         Query query = new Query(criteria);
 
