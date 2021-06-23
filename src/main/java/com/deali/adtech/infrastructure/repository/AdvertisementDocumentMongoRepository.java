@@ -48,11 +48,11 @@ public class AdvertisementDocumentMongoRepository
 
         LimitOperation limitOperation = Aggregation.limit(10);
 
-        Aggregation aggregation = Aggregation.newAggregation(projectionOperation, sortOperation,
-                limitOperation);
+        Aggregation aggregation =
+                Aggregation.newAggregation(projectionOperation, sortOperation, limitOperation);
 
-        AggregationResults<ResponseCreative> results = mongoTemplate.aggregate(aggregation, "advertisement",
-                ResponseCreative.class);
+        AggregationResults<ResponseCreative> results = mongoTemplate
+                .aggregate(aggregation, "advertisement", ResponseCreative.class);
 
         return results.getMappedResults();
     }

@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface AdvertisementDocumentRepository {
     List<ResponseCreative> searchTop10Advertisement();
-    HashMap searchMinMaxWinningBidAndModifiedAt();
+    HashMap<String,Number> searchMinMaxWinningBidAndModifiedAt();
 }
