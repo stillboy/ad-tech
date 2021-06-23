@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <form action="/core/v1/creative/post" method="post" enctype="multipart/form-data">
+      <div><label>제목:</label> <input type="text" name="title"/></div>
+      <div><label>낙찰가:</label> <input type="text" name="winningBid"/></div>
+      <div><label>노출일자:</label> <input type="text" name="exposureDate" placeholder="yyyy-MM-ddTHH:mm:ss"/></div>
+      <div><label>만료일자:</label> <input type="text" name="expiryDate" placeholder="yyyy-MM-ddTHH:mm:ss"/></div>
+      <div><label>파일:</label> <input type="file" name="image"></div>
+      <div><button type="submit">생성</button></div>
+  </form>
+</body>
+</html>

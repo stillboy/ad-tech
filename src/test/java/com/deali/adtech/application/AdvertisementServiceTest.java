@@ -10,6 +10,7 @@ import com.deali.adtech.presentation.dto.RequestExtendAdvertisement;
 import com.deali.adtech.presentation.dto.RequestPostPoneAdvertisement;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +128,9 @@ class AdvertisementServiceTest {
     @DisplayName("소재 수정 성공 테스트 케이스 이미지가 있는 경우")
     public void edit_advertisement_success_test_with_image() throws Exception {
         /* given */
-        Advertisement target = advertisementRepository.findAll().get(0);
+        Long targetId = createAdvertisement();
+        Advertisement target = advertisementRepository.findById(targetId)
+                .orElseThrow(EntityNotFoundException::new);
 
         RequestEditAdvertisement request = new RequestEditAdvertisement();
         request.setId(target.getId());
@@ -166,9 +169,11 @@ class AdvertisementServiceTest {
 
     @Test
     @DisplayName("소재 기간 연기 성공 테스트 케이스")
-    public void postpone_advertisement_success_test() {
+    public void postpone_advertisement_success_test() throws Exception {
         /* given */
-        Advertisement target = advertisementRepository.findAll().get(0);
+        Long targetId = createAdvertisement();
+        Advertisement target = advertisementRepository.findById(targetId)
+                .orElseThrow(EntityNotFoundException::new);
 
         RequestPostPoneAdvertisement request = new RequestPostPoneAdvertisement();
         request.setAdvertisementId(target.getId());
@@ -195,9 +200,11 @@ class AdvertisementServiceTest {
 
     @Test
     @DisplayName("소재 기간 연장 선공 테스트 케이스")
-    public void extend_advertisement_success_test() {
+    public void extend_advertisement_success_test() throws Exception {
         /* given */
-        Advertisement target = advertisementRepository.findAll().get(0);
+        Long targetId = createAdvertisement();
+        Advertisement target = advertisementRepository.findById(targetId)
+                .orElseThrow(EntityNotFoundException::new);
 
         LocalDateTime newExpiryDate = LocalDateTime.of(2021,7,25,12,00);
 
@@ -237,6 +244,25 @@ class AdvertisementServiceTest {
     }
 
     private MultipartFile buildMockMultipartFile(String fileName) throws Exception{
-        return new MockMultipartFile(fileName, new FileInputStream(new File(TEST_PATH+fileName)));
+        return new MockMultipartFile(fileName, fileName, "jpg",new FileInputStream(new File(TEST_PATH+fileName)));
+
+    }
+
+    private Long createAdvertisement() throws Exception {
+        RequestCreateAdvertisement request = new RequestCreateAdvertisement();
+        request.setTitle("셋업 데이터");
+        request.setWinningBid(5);
+        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
+        request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
+
+        String fileName = "temp2.jpg";
+        MultipartFile multipartFile = buildMockMultipartFile(fileName);
+        request.setImage(multipartFile);
+
+        Long result = advertisementServiceImpl.createAdvertisement(request);
+        entityManager.flush();
+        entityManager.clear();
+
+        return result;
     }
 }

@@ -5,6 +5,7 @@ import com.deali.adtech.domain.AdvertisementImage;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +15,10 @@ public interface AdvertisementMapper {
 
     Advertisement dtoToEntity(RequestCreateAdvertisement requestCreateAdvertisement);
 
-    @Mapping(source = "path", target = "path")
+    @Mappings
+    ({
+            @Mapping(source = "path", target = "path"),
+            @Mapping(source = "file.originalFilename", target = "name")
+    })
     AdvertisementImage fileToEntity(MultipartFile file, String path);
 }

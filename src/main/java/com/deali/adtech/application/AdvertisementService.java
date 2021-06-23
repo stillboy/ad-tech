@@ -56,10 +56,9 @@ public class AdvertisementService {
         advertisementImage = imageRepository.save(advertisementImage);
 
         try {
-
             advertisementImage.uploadImageFile(requestCreateAdvertisement.getImage().getBytes());
-
         } catch (IOException exception) {
+            //TODO::이미지 업로드 익셉션 정의
             throw new RuntimeException();
         }
 
@@ -83,7 +82,7 @@ public class AdvertisementService {
         if(newImage != null && !newImage.isEmpty()) {
             AdvertisementImage advertisementImage = getAdvertisementImageEntity(advertisement);
             try {
-                advertisementImage.exchangeImage(newImage.getName(), newImage.getSize(), newImage.getBytes());
+                advertisementImage.exchangeImage(newImage.getOriginalFilename(), newImage.getSize(), newImage.getBytes());
             } catch (IOException exception) {
                 throw new RuntimeException();
             }

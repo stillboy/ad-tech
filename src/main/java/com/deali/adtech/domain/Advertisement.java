@@ -12,6 +12,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,19 +33,19 @@ public class Advertisement {
     private Integer winningBid;
 
     @Column(name="CREATED_AT", nullable = false, updatable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:zz")
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ssZ")
     private LocalDateTime createdAt;
 
     @Column(name="MODIFIED_AT", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:zz")
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ssZ")
     private LocalDateTime modifiedAt;
 
     @Column(name="EXPIRY_DATE", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm")
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ssZ")
     private LocalDateTime expiryDate;
 
     @Column(name="EXPOSURE_DATE", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm")
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ssZ")
     private LocalDateTime exposureDate;
 
     @Column(name="STATUS", nullable = false)
@@ -90,7 +92,7 @@ public class Advertisement {
 
         editTitle(title);
         changeWinningBid(winningBid);
-        updateModifiedAt(LocalDateTime.now());
+        updateModifiedAt(getCurrentTimeWithAsiaTimeZone());
     }
 
     public void postpone(LocalDateTime newExposureDate) {
@@ -145,9 +147,16 @@ public class Advertisement {
         return duration;
     }
 
+    //TODO::java 타임존 관련 이슈 해결필요
     protected void initCreationDate() {
-        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime currentTime = getCurrentTimeWithAsiaTimeZone();
+
         this.createdAt = currentTime;
         this.modifiedAt = currentTime;
+    }
+
+    private LocalDateTime getCurrentTimeWithAsiaTimeZone() {
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+        return now.withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime();
     }
 }

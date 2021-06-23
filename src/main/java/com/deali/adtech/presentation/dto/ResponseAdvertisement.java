@@ -5,6 +5,7 @@ import com.deali.adtech.domain.ExposeCount;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,13 +15,13 @@ public class ResponseAdvertisement {
     private Long id;
     private String title;
     private Integer winningBid;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime modifiedAt;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime exposureDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expiryDate;
     private String status;
     private Long exposeCount;
@@ -42,7 +43,7 @@ public class ResponseAdvertisement {
     }
 
     @QueryProjection
-    public ResponseAdvertisement(Long id, String title, Integer WinningBid, LocalDateTime createdAt,
+    public ResponseAdvertisement(Long id, String title, Integer winningBid, LocalDateTime createdAt,
                                  LocalDateTime modifiedAt, LocalDateTime exposureDate,
                                  LocalDateTime expiryDate, AdvertisementStatus status) {
         this.id = id;

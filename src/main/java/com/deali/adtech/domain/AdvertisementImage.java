@@ -92,7 +92,6 @@ public class AdvertisementImage {
     }
 
     private boolean removeImageFile() {
-        System.out.println(">>>>>>>"+getFullPathName());
         File file = new File(getFullPathName());
 
         //TODO::익셉션 정의 필요, 파일이 존재하지 않을 시

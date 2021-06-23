@@ -4,8 +4,7 @@ import com.deali.adtech.application.AdvertisementService;
 import com.deali.adtech.presentation.dto.AdvertisementSearchCondition;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.ResponseAdvertisement;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
-import javax.xml.ws.Response;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 @Transactional
 @SpringBootTest
 class JpaAdvertisementSearchDaoTest {
