@@ -11,6 +11,10 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Divide;
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Multiply;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.ZoneId;
 import java.util.Date;
@@ -21,6 +25,8 @@ import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 class AdvertisementDocumentMongoRepositoryTest {
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     @Autowired
     private AdvertisementDocumentRepository advertisementDocumentRepository;
 
@@ -34,5 +40,14 @@ class AdvertisementDocumentMongoRepositoryTest {
     public void test() {
        List<ResponseCreative> results =
                advertisementDocumentRepository.searchTop10Advertisement();
+    }
+
+    @Test
+    public void redis_test() {
+        ValueOperations<String, String> operations = redisTemplate.opsForValue();
+        Long key = 3L;
+        String sKey = key.toString();
+
+        operations.increment("3");
     }
 }

@@ -1,6 +1,7 @@
 package com.deali.adtech.infrastructure.repository;
 
 import com.deali.adtech.domain.AdvertisementImage;
+import com.deali.adtech.domain.QAdvertisementExposeCount;
 import com.deali.adtech.presentation.dto.AdvertisementSearchCondition;
 import com.deali.adtech.presentation.dto.QResponseAdvertisement;
 import com.deali.adtech.presentation.dto.ResponseAdvertisement;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.deali.adtech.domain.QAdvertisement.*;
-import static com.deali.adtech.domain.QExposeCount.*;
+import static com.deali.adtech.domain.QAdvertisementExposeCount.*;
 
 @RequiredArgsConstructor
 @Repository
@@ -49,10 +50,10 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
                 .select(new QResponseAdvertisement(advertisement.id, advertisement.title,
                         advertisement.winningBid, advertisement.createdAt, advertisement.modifiedAt,
                         advertisement.exposureDate, advertisement.expiryDate, advertisement.status,
-                        exposeCount1.exposeCount))
+                        advertisementExposeCount.exposeCount))
                 .from(advertisement)
-                .leftJoin(exposeCount1)
-                .on(advertisement.id.eq(exposeCount1.advertisement.id))
+                .leftJoin(advertisementExposeCount)
+                .on(advertisement.id.eq(advertisementExposeCount.advertisement.id))
                 .where(advertisement.id.eq(advertisementId))
                 .fetchOne();
 

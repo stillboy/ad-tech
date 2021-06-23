@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Table(name = "advertisement_expose_count")
-public class ExposeCount {
+public class AdvertisementExposeCount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,7 +23,7 @@ public class ExposeCount {
     private Advertisement advertisement;
 
     @Builder
-    public ExposeCount(Advertisement advertisement) {
+    public AdvertisementExposeCount(Advertisement advertisement) {
         this.exposeCount = 0L;
         bindAdvertisement(advertisement);
     }

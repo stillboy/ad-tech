@@ -14,7 +14,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -53,7 +52,7 @@ public class Advertisement {
     private AdvertisementStatus status;
 
     @OneToOne(mappedBy = "advertisement", fetch = FetchType.LAZY)
-    private ExposeCount exposeCount;
+    private AdvertisementExposeCount advertisementExposeCount;
 
     @OneToMany(mappedBy = "advertisement", fetch = FetchType.LAZY)
     private List<AdvertisementImage> images;

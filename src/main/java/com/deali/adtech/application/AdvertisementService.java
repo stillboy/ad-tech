@@ -1,11 +1,9 @@
 package com.deali.adtech.application;
 
 import com.deali.adtech.domain.*;
-import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
-import com.deali.adtech.infrastructure.exception.InvalidPostponeRequestException;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
-import com.deali.adtech.infrastructure.repository.ExposeCountRepository;
+import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
 import com.deali.adtech.infrastructure.util.AdvertisementMapper;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
@@ -14,20 +12,15 @@ import com.deali.adtech.presentation.dto.RequestPostPoneAdvertisement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.lang.NonNull;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Transactional
 @RequiredArgsConstructor
@@ -35,7 +28,7 @@ import java.util.List;
 public class AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementImageRepository imageRepository;
-    private final ExposeCountRepository exposeCountRepository;
+    private final AdvertisementExposeCountRepository advertisementExposeCountRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Value("${image.advertisement.default-path}")
@@ -62,11 +55,11 @@ public class AdvertisementService {
             throw new RuntimeException();
         }
 
-        ExposeCount exposeCount = ExposeCount.builder()
+        AdvertisementExposeCount advertisementExposeCount = AdvertisementExposeCount.builder()
                 .advertisement(advertisement)
                 .build();
 
-        exposeCount = exposeCountRepository.save(exposeCount);
+        advertisementExposeCount = advertisementExposeCountRepository.save(advertisementExposeCount);
 
         return advertisement.getId();
     }

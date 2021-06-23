@@ -1,8 +1,6 @@
 package com.deali.adtech.presentation.dto;
 
 import com.deali.adtech.domain.AdvertisementStatus;
-import com.deali.adtech.domain.ExposeCount;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;

@@ -1,22 +1,18 @@
 package com.deali.adtech.application;
 
 import com.deali.adtech.domain.Advertisement;
-import com.deali.adtech.domain.AdvertisementImage;
 import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
 import com.deali.adtech.presentation.dto.RequestExtendAdvertisement;
 import com.deali.adtech.presentation.dto.RequestPostPoneAdvertisement;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -86,7 +82,7 @@ class AdvertisementServiceTest {
                 .hasFieldOrPropertyWithValue("winningBid", request.getWinningBid())
                 .hasFieldOrPropertyWithValue("status", AdvertisementStatus.WAITING);
 
-        assertThat(target.getExposeCount())
+        assertThat(target.getAdvertisementExposeCount())
                 .hasFieldOrPropertyWithValue("exposeCount", 0L);
 
         int lastDot = fileName.lastIndexOf(".");
