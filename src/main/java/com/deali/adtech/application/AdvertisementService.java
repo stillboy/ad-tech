@@ -4,7 +4,8 @@ import com.deali.adtech.domain.*;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
-import com.deali.adtech.infrastructure.util.AdvertisementMapper;
+import com.deali.adtech.infrastructure.util.event.AdvertisementRemovedEvent;
+import com.deali.adtech.infrastructure.util.mapper.AdvertisementMapper;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
 import com.deali.adtech.presentation.dto.RequestExtendAdvertisement;
@@ -12,8 +13,6 @@ import com.deali.adtech.presentation.dto.RequestPostPoneAdvertisement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +71,7 @@ public class AdvertisementService {
 
         MultipartFile newImage = requestEditAdvertisement.getNewImage();
 
+        //TODO::로직 변경 필요, 도메인 서비스로 따로 로직을 분리하면 좋을 것으로 생각
         if(newImage != null && !newImage.isEmpty()) {
             AdvertisementImage advertisementImage = getAdvertisementImageEntity(advertisement);
             try {
@@ -95,7 +95,7 @@ public class AdvertisementService {
     public void removeAdvertisement(@NonNull Long advertisementId) {
         Advertisement advertisement = getAdvertisementEntity(advertisementId);
         advertisement.remove();
-        //TODO::이것도 나중에는 분리하는게 맞을거 같은데?
+        //TODO::분리할 수 있는 방법이 있나?
         eventPublisher.publishEvent(new AdvertisementRemovedEvent(advertisement));
     }
 

@@ -1,5 +1,6 @@
-package com.deali.adtech.domain;
+package com.deali.adtech.infrastructure.util.event;
 
+import com.deali.adtech.domain.Advertisement;
 import lombok.Getter;
 
 @Getter

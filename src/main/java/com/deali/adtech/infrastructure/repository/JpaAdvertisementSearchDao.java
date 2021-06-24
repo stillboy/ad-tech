@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ import static com.deali.adtech.domain.QAdvertisementExposeCount.*;
 @Repository
 public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
     private final JPAQueryFactory queryFactory;
-    private final AdvertisementRepository advertisementRepository;
     private final AdvertisementImageRepository advertisementImageRepository;
 
     @Override
@@ -43,9 +43,9 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
         return new PageImpl<ResponseAdvertisement>(result.getResults(), pageable, result.getTotal());
     }
 
+    //TODO:: 레디스 db 연동 작업, 일단 10분 마다
     @Override
     public ResponseAdvertisement findAdvertisementById(Long advertisementId) {
-        //TODO::redis와 연동해서 조회수를 redis에서 가져오는 로직 추가
         ResponseAdvertisement responseAdvertisement = queryFactory
                 .select(new QResponseAdvertisement(advertisement.id, advertisement.title,
                         advertisement.winningBid, advertisement.createdAt, advertisement.modifiedAt,

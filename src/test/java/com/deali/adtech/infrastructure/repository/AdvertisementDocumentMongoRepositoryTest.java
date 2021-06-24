@@ -47,7 +47,5 @@ class AdvertisementDocumentMongoRepositoryTest {
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
         Long key = 3L;
         String sKey = key.toString();
-
-        operations.increment("3");
     }
 }

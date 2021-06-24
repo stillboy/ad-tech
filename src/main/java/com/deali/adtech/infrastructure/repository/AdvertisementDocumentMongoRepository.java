@@ -22,8 +22,6 @@ public class AdvertisementDocumentMongoRepository
 
     @Override
     public List<ResponseCreative> searchTop10Advertisement() {
-        //TODO::min-max 정규화 (x-min)/(max-min)
-
         HashMap<String, Number> map = searchMinMaxWinningBidAndModifiedAt();
 
         Integer maxBid = (Integer)map.get("maxBid");

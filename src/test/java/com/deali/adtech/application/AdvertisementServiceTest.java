@@ -2,6 +2,8 @@ package com.deali.adtech.application;
 
 import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.domain.AdvertisementStatus;
+import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
+import com.deali.adtech.infrastructure.exception.InvalidWinningBidException;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
@@ -20,6 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -36,6 +39,8 @@ class AdvertisementServiceTest {
     @Autowired
     private EntityManager entityManager;
 
+    private Long testAdvertisementId;
+
     @BeforeEach
     public void setUp() throws Exception{
         RequestCreateAdvertisement request = new RequestCreateAdvertisement();
@@ -48,7 +53,7 @@ class AdvertisementServiceTest {
         MultipartFile multipartFile = buildMockMultipartFile(fileName);
         request.setImage(multipartFile);
 
-        advertisementServiceImpl.createAdvertisement(request);
+        testAdvertisementId = advertisementServiceImpl.createAdvertisement(request);
         entityManager.flush();
         entityManager.clear();
     }
@@ -57,15 +62,8 @@ class AdvertisementServiceTest {
     @DisplayName("소재 생성 성공 테스트 케이스")
     public void create_advertisement_success_test() throws Exception{
         /* given */
-        RequestCreateAdvertisement request = new RequestCreateAdvertisement();
-        request.setTitle("테스트1");
-        request.setWinningBid(1);
-        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
-        request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
-
-        String fileName = "temp2.jpg";
-        MultipartFile multipartFile = buildMockMultipartFile(fileName);
-        request.setImage(multipartFile);
+        RequestCreateAdvertisement request = buildRequestCreatedAdvertisement();
+        String fileName = request.getImage().getOriginalFilename();
 
         /* when */
         Long advertisementId = advertisementServiceImpl.createAdvertisement(request);
@@ -93,7 +91,7 @@ class AdvertisementServiceTest {
     }
 
     @Test
-    @DisplayName("소재 수정 성공 테스트 케이스 이미지가 없는 경우")
+    @DisplayName("소재 수정 성공 테스트 케이스 수정할 이미지가 없는 경우")
     public void edit_advertisement_success_test_no_images() {
         /* given */
         Advertisement target = advertisementRepository.findAll().get(0);
@@ -109,7 +107,6 @@ class AdvertisementServiceTest {
         entityManager.clear();
 
         Advertisement result = advertisementRepository.getById(target.getId());
-
         /* then */
 
         assertThat(result)
@@ -119,6 +116,44 @@ class AdvertisementServiceTest {
         assertThat(result.getCreatedAt())
                 .isNotEqualTo(result.getModifiedAt());
     }
+
+    @Test
+    @DisplayName("소재 수정 실패 테스트 케이스 삭제된 광고일 경우")
+    public void edit_advertisement_fail_test_invalid_status() {
+        /* given */
+        Advertisement advertisement = advertisementRepository.findById(testAdvertisementId)
+                .orElseThrow(EntityNotFoundException::new);
+
+        RequestEditAdvertisement request = buildRequestEditAdvertisement();
+
+        /* when */
+        advertisement.remove();
+
+        assertThatExceptionOfType(AlreadyRemovedAdvertisementException.class)
+                .isThrownBy(()->{
+                    advertisementServiceImpl.editAdvertisement(request);
+                });
+
+        /* then */
+    }
+
+    @Test
+    @DisplayName("소재 수정 실패 테스트 케이스 낙찰가가 1~10의 범위가 아닐 경우")
+    public void edit_advertisement_fail_test_invalid_winning_bid() {
+        /* given */
+        RequestEditAdvertisement request = buildRequestEditAdvertisement();
+        request.setWinningBid(11);
+
+        /* when */
+        assertThatExceptionOfType(InvalidWinningBidException.class)
+                .isThrownBy(()->{
+                    advertisementServiceImpl.editAdvertisement(request);
+                });
+
+        /* then */
+    }
+
+
 
     @Test
     @DisplayName("소재 수정 성공 테스트 케이스 이미지가 있는 경우")
@@ -239,9 +274,17 @@ class AdvertisementServiceTest {
                 .hasFieldOrPropertyWithValue("status", AdvertisementStatus.DELETED);
     }
 
-    private MultipartFile buildMockMultipartFile(String fileName) throws Exception{
-        return new MockMultipartFile(fileName, fileName, "jpg",new FileInputStream(new File(TEST_PATH+fileName)));
+    private MultipartFile buildMockMultipartFile(String fileName) {
+        MultipartFile file = null;
+        File image = new File(TEST_PATH + fileName);
 
+        try(FileInputStream fileInputStream =
+                new FileInputStream(image)) {
+            file = new MockMultipartFile(fileName, fileName, "jpg", fileInputStream);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+        return file;
     }
 
     private Long createAdvertisement() throws Exception {
@@ -260,5 +303,28 @@ class AdvertisementServiceTest {
         entityManager.clear();
 
         return result;
+    }
+
+    private RequestCreateAdvertisement buildRequestCreatedAdvertisement() {
+        RequestCreateAdvertisement request = new RequestCreateAdvertisement();
+        request.setTitle("테스트1");
+        request.setWinningBid(1);
+        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
+        request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
+
+        String fileName = "temp2.jpg";
+        MultipartFile multipartFile = buildMockMultipartFile(fileName);
+        request.setImage(multipartFile);
+
+        return request;
+    }
+
+    private RequestEditAdvertisement buildRequestEditAdvertisement() {
+        RequestEditAdvertisement request = new RequestEditAdvertisement();
+        request.setId(testAdvertisementId);
+        request.setTitle("수정된 제목");
+        request.setWinningBid(7);
+
+        return request;
     }
 }

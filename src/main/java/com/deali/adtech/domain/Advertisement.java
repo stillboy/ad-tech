@@ -1,9 +1,6 @@
 package com.deali.adtech.domain;
 
-import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
-import com.deali.adtech.infrastructure.exception.InvalidPostponeRequestException;
-import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
-import com.deali.adtech.infrastructure.exception.InvalidRemoveRqeustException;
+import com.deali.adtech.infrastructure.exception.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -74,7 +71,10 @@ public class Advertisement {
     }
 
     public void changeWinningBid(Integer winningBid) {
-        if(winningBid == null || winningBid < 1 || winningBid > 10) return;
+        if(winningBid == null || winningBid < 1 || winningBid > 10) {
+            throw new InvalidWinningBidException();
+        }
+
         this.winningBid = winningBid;
     }
 
@@ -83,7 +83,6 @@ public class Advertisement {
         this.modifiedAt = modifiedAt;
     }
 
-    //TODO::수정일이 소재를 수정하면 갱신이 되는건지 아니면 따로 수정일을 갱신하는 건지
     public void editAdvertisement(String title, Integer winningBid) {
         if(status == AdvertisementStatus.DELETED) {
             throw new AlreadyRemovedAdvertisementException();
@@ -128,7 +127,7 @@ public class Advertisement {
 
     public void remove() {
         if(status == AdvertisementStatus.DELETED) {
-            throw new InvalidRemoveRqeustException();
+            throw new InvalidRemoveRequestException();
         }
 
         status = AdvertisementStatus.DELETED;
@@ -154,6 +153,7 @@ public class Advertisement {
         this.modifiedAt = currentTime;
     }
 
+    //TODO::파라미터로 String을 넣고 거기서 타임존 판별해서 가져오도록 수정
     private LocalDateTime getCurrentTimeWithAsiaTimeZone() {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         return now.withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime();

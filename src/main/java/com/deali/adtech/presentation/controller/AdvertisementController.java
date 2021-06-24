@@ -44,7 +44,7 @@ public class AdvertisementController {
 
         advertisementService.createAdvertisement(requestCreateAdvertisement);
 
-        return "redirect:";
+        return "redirect:/core/v1/creative";
     }
 
     @GetMapping("/{advertisementId}")
@@ -67,7 +67,7 @@ public class AdvertisementController {
         requestEditAdvertisement.setId(advertisementId);
         advertisementService.editAdvertisement(requestEditAdvertisement);
 
-        return "redirect:";
+        return "redirect:/core/v1/creative/" + advertisementId;
     }
 
     @GetMapping("/list")
@@ -83,6 +83,13 @@ public class AdvertisementController {
         modelAndView.setViewName("creativeList");
 
         return modelAndView;
+    }
+
+    @PostMapping("/{advertisementId}/delete")
+    public String deleteCreative(@PathVariable(name = "advertisementId") Long id) {
+        advertisementService.removeAdvertisement(id);
+
+        return "redirect:/core/v1/creative";
     }
 
     private String convertFile(String path) throws IOException {

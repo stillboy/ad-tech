@@ -1,4 +1,4 @@
-package com.deali.adtech.infrastructure.util;
+package com.deali.adtech.infrastructure.util.mapper;
 
 import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.domain.AdvertisementImage;

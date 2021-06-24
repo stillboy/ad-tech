@@ -14,8 +14,7 @@ import java.time.LocalDateTime;
 @Document(collection = "advertisement")
 public class AdvertisementDocument {
     @Id
-    @GeneratedValue
-    private ObjectId id;
+    private ObjectId _id;
     private String title;
     private Integer winningBid;
     private LocalDateTime modifiedAt;
