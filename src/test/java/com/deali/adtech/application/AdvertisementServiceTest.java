@@ -3,6 +3,7 @@ package com.deali.adtech.application;
 import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
+import com.deali.adtech.infrastructure.exception.InvalidTitleException;
 import com.deali.adtech.infrastructure.exception.InvalidWinningBidException;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
@@ -42,7 +43,7 @@ class AdvertisementServiceTest {
     private Long testAdvertisementId;
 
     @BeforeEach
-    public void setUp() throws Exception{
+    public void setUp() {
         RequestCreateAdvertisement request = new RequestCreateAdvertisement();
         request.setTitle("셋업 데이터");
         request.setWinningBid(5);
@@ -60,7 +61,7 @@ class AdvertisementServiceTest {
 
     @Test
     @DisplayName("소재 생성 성공 테스트 케이스")
-    public void create_advertisement_success_test() throws Exception{
+    public void create_advertisement_success_test() {
         /* given */
         RequestCreateAdvertisement request = buildRequestCreatedAdvertisement();
         String fileName = request.getImage().getOriginalFilename();
@@ -153,20 +154,28 @@ class AdvertisementServiceTest {
         /* then */
     }
 
+    @Test
+    @DisplayName("소재 수정 실패 테스트 케이스 수정할 광고 제목이 null 이거나 빈 문자열일 경우 ")
+    public void edit_advertisement_final_test_invalid_modified_time() {
+        RequestEditAdvertisement request =
+                buildRequestEditAdvertisement();
 
+        request.setTitle("     ");
+
+        assertThatExceptionOfType(InvalidTitleException.class)
+                .isThrownBy(()->{
+                   advertisementServiceImpl.editAdvertisement(request);
+                });
+    }
 
     @Test
     @DisplayName("소재 수정 성공 테스트 케이스 이미지가 있는 경우")
-    public void edit_advertisement_success_test_with_image() throws Exception {
+    public void edit_advertisement_success_test_with_image()  {
         /* given */
-        Long targetId = createAdvertisement();
-        Advertisement target = advertisementRepository.findById(targetId)
+        Advertisement target = advertisementRepository.findById(testAdvertisementId)
                 .orElseThrow(EntityNotFoundException::new);
 
-        RequestEditAdvertisement request = new RequestEditAdvertisement();
-        request.setId(target.getId());
-        request.setTitle("수정된 제목");
-        request.setWinningBid(7);
+        RequestEditAdvertisement request = buildRequestEditAdvertisement();
 
         String fileName = "editedImage.jpg";
         int lastDot = fileName.lastIndexOf(".");
@@ -187,9 +196,6 @@ class AdvertisementServiceTest {
                 .hasFieldOrPropertyWithValue("title", request.getTitle())
                 .hasFieldOrPropertyWithValue("winningBid", request.getWinningBid());
 
-        assertThat(result.getCreatedAt())
-                .isNotEqualTo(result.getModifiedAt());
-
         assertThat(result.getImages().size())
                 .isEqualTo(1);
 
@@ -200,10 +206,9 @@ class AdvertisementServiceTest {
 
     @Test
     @DisplayName("소재 기간 연기 성공 테스트 케이스")
-    public void postpone_advertisement_success_test() throws Exception {
+    public void postpone_advertisement_success_test() {
         /* given */
-        Long targetId = createAdvertisement();
-        Advertisement target = advertisementRepository.findById(targetId)
+        Advertisement target = advertisementRepository.findById(testAdvertisementId)
                 .orElseThrow(EntityNotFoundException::new);
 
         RequestPostPoneAdvertisement request = new RequestPostPoneAdvertisement();
@@ -233,8 +238,7 @@ class AdvertisementServiceTest {
     @DisplayName("소재 기간 연장 선공 테스트 케이스")
     public void extend_advertisement_success_test() throws Exception {
         /* given */
-        Long targetId = createAdvertisement();
-        Advertisement target = advertisementRepository.findById(targetId)
+        Advertisement target = advertisementRepository.findById(testAdvertisementId)
                 .orElseThrow(EntityNotFoundException::new);
 
         LocalDateTime newExpiryDate = LocalDateTime.of(2021,7,25,12,00);
@@ -287,23 +291,6 @@ class AdvertisementServiceTest {
         return file;
     }
 
-    private Long createAdvertisement() throws Exception {
-        RequestCreateAdvertisement request = new RequestCreateAdvertisement();
-        request.setTitle("셋업 데이터");
-        request.setWinningBid(5);
-        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
-        request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
-
-        String fileName = "temp2.jpg";
-        MultipartFile multipartFile = buildMockMultipartFile(fileName);
-        request.setImage(multipartFile);
-
-        Long result = advertisementServiceImpl.createAdvertisement(request);
-        entityManager.flush();
-        entityManager.clear();
-
-        return result;
-    }
 
     private RequestCreateAdvertisement buildRequestCreatedAdvertisement() {
         RequestCreateAdvertisement request = new RequestCreateAdvertisement();

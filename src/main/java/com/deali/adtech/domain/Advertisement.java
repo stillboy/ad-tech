@@ -4,6 +4,7 @@ import com.deali.adtech.infrastructure.exception.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.mapstruct.ap.shaded.freemarker.template.utility.NullArgumentException;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -29,19 +30,15 @@ public class Advertisement {
     private Integer winningBid;
 
     @Column(name="CREATED_AT", nullable = false, updatable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ssZ")
     private LocalDateTime createdAt;
 
     @Column(name="MODIFIED_AT", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ssZ")
     private LocalDateTime modifiedAt;
 
     @Column(name="EXPIRY_DATE", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ssZ")
     private LocalDateTime expiryDate;
 
     @Column(name="EXPOSURE_DATE", nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ssZ")
     private LocalDateTime exposureDate;
 
     @Column(name="STATUS", nullable = false)
@@ -66,7 +63,9 @@ public class Advertisement {
     }
 
     public void editTitle(String title) {
-        if(title == null || title.trim().length() == 0) return;
+        if(title == null || title.trim().length() == 0) {
+            throw new InvalidTitleException();
+        }
         this.title = title;
     }
 
@@ -79,7 +78,10 @@ public class Advertisement {
     }
 
     public void updateModifiedAt(LocalDateTime modifiedAt) {
-        if(modifiedAt == null || modifiedAt.isBefore(this.modifiedAt)) return;
+        if(modifiedAt == null || modifiedAt.isBefore(this.modifiedAt)) {
+            throw new InvalidModifiedTimeException();
+        }
+
         this.modifiedAt = modifiedAt;
     }
 
@@ -93,7 +95,12 @@ public class Advertisement {
         updateModifiedAt(getCurrentTimeWithAsiaTimeZone());
     }
 
+    //TODO::modifiedAt 수정해줘야함
     public void postpone(LocalDateTime newExposureDate) {
+        if(newExposureDate.isBefore(exposureDate)) {
+            throw new InvalidExposureDateException();
+        }
+
         switch (status) {
             case WAITING:
             case ADVERTISING:
@@ -106,6 +113,7 @@ public class Advertisement {
         }
     }
 
+    //TODO::modifiedAt 수정해줘야함
     public void extend(LocalDateTime newExpiryDate) {
         if(newExpiryDate.isBefore(exposureDate) || newExpiryDate.isBefore(expiryDate)) {
             throw new RuntimeException();
@@ -134,10 +142,6 @@ public class Advertisement {
     }
 
     private Duration calculateRemainingTime(LocalDateTime newExposureDate) {
-        if(newExposureDate.isBefore(exposureDate)) {
-            throw new InvalidExposureDateException();
-        }
-
         Duration duration = Duration.between(exposureDate, expiryDate);
         this.exposureDate = newExposureDate;
         this.expiryDate = newExposureDate.plus(duration);
@@ -147,15 +151,11 @@ public class Advertisement {
 
     //TODO::java 타임존 관련 이슈 해결필요
     protected void initCreationDate() {
-        LocalDateTime currentTime = getCurrentTimeWithAsiaTimeZone();
-
-        this.createdAt = currentTime;
-        this.modifiedAt = currentTime;
+        this.createdAt = getCurrentTimeWithAsiaTimeZone();
+        this.modifiedAt = getCurrentTimeWithAsiaTimeZone();
     }
 
-    //TODO::파라미터로 String을 넣고 거기서 타임존 판별해서 가져오도록 수정
     private LocalDateTime getCurrentTimeWithAsiaTimeZone() {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
-        return now.withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime();
+        return ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
     }
 }
