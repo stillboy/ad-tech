@@ -33,6 +33,7 @@ public class AdvertisementService {
     @Value("${image.advertisement.default-path}")
     private String defaultPath;
 
+    //TODO::생성시에 광고 노출 시작일자와 만료일자에 대한 검증이 있어야 한다.
     public Long createAdvertisement(@NonNull RequestCreateAdvertisement requestCreateAdvertisement) {
 
         Advertisement advertisement = AdvertisementMapper.INSTANCE

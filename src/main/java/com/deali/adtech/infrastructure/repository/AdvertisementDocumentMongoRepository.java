@@ -72,7 +72,12 @@ public class AdvertisementDocumentMongoRepository
        AggregationResults<HashMap> results =
                mongoTemplate.aggregate(aggregation, "advertisement", HashMap.class);
 
-       HashMap result = results.getMappedResults().get(0);
+       //TODO::런타임 익셉션 정의와 핸들링 선언하기
+       if(results.getUniqueMappedResult() == null) {
+           throw new RuntimeException();
+       }
+
+       HashMap result = results.getUniqueMappedResult();
 
        Date maxDate = (Date)result.get("maxDate");
        Date minDate = (Date)result.get("minDate");

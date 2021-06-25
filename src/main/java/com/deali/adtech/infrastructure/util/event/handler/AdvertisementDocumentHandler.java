@@ -25,6 +25,6 @@ public class AdvertisementDocumentHandler {
 
         Query query = new Query(criteria);
 
-        mongoTemplate.remove(query);
+        mongoTemplate.remove(query, "advertisement");
     }
 }

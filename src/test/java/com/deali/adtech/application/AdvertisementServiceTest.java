@@ -24,8 +24,11 @@ import javax.persistence.EntityNotFoundException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -236,7 +239,7 @@ class AdvertisementServiceTest {
 
     @Test
     @DisplayName("소재 기간 연장 선공 테스트 케이스")
-    public void extend_advertisement_success_test() throws Exception {
+    public void extend_advertisement_success_test()  {
         /* given */
         Advertisement target = advertisementRepository.findById(testAdvertisementId)
                 .orElseThrow(EntityNotFoundException::new);
@@ -291,10 +294,9 @@ class AdvertisementServiceTest {
         return file;
     }
 
-
     private RequestCreateAdvertisement buildRequestCreatedAdvertisement() {
         RequestCreateAdvertisement request = new RequestCreateAdvertisement();
-        request.setTitle("테스트1");
+        request.setTitle(randomString());
         request.setWinningBid(1);
         request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
         request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
@@ -314,4 +316,14 @@ class AdvertisementServiceTest {
 
         return request;
     }
+
+    private String randomString() {
+        Random random = new Random();
+        return  random.ints(48, 122+1)
+                .filter(i -> (i <= 57 || i >= 65) && (i<=90 || i>=97))
+                .limit(10)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+    }
+
 }

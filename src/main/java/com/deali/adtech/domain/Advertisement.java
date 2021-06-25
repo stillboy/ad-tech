@@ -59,7 +59,8 @@ public class Advertisement {
         this.expiryDate = expiryDate;
         this.exposureDate = exposureDate;
         this.status = AdvertisementStatus.WAITING;
-        initCreationDate();
+        this.createdAt = LocalDateTime.now();
+        this.modifiedAt = LocalDateTime.from(this.createdAt);
     }
 
     public void editTitle(String title) {
@@ -77,12 +78,14 @@ public class Advertisement {
         this.winningBid = winningBid;
     }
 
-    public void updateModifiedAt(LocalDateTime modifiedAt) {
-        if(modifiedAt == null || modifiedAt.isBefore(this.modifiedAt)) {
+    public void updateModifiedAt() {
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        if(currentTime == null || currentTime.isBefore(this.modifiedAt)) {
             throw new InvalidModifiedTimeException();
         }
 
-        this.modifiedAt = modifiedAt;
+        this.modifiedAt = currentTime;
     }
 
     public void editAdvertisement(String title, Integer winningBid) {
@@ -92,10 +95,9 @@ public class Advertisement {
 
         editTitle(title);
         changeWinningBid(winningBid);
-        updateModifiedAt(getCurrentTimeWithAsiaTimeZone());
+        updateModifiedAt();
     }
 
-    //TODO::modifiedAt 수정해줘야함
     public void postpone(LocalDateTime newExposureDate) {
         if(newExposureDate.isBefore(exposureDate)) {
             throw new InvalidExposureDateException();
@@ -106,6 +108,7 @@ public class Advertisement {
             case ADVERTISING:
                 calculateRemainingTime(newExposureDate);
                 status = AdvertisementStatus.WAITING;
+                updateModifiedAt();
                 break;
             case EXPIRED:
             case DELETED:
@@ -113,7 +116,6 @@ public class Advertisement {
         }
     }
 
-    //TODO::modifiedAt 수정해줘야함
     public void extend(LocalDateTime newExpiryDate) {
         if(newExpiryDate.isBefore(exposureDate) || newExpiryDate.isBefore(expiryDate)) {
             throw new RuntimeException();
@@ -123,10 +125,12 @@ public class Advertisement {
             case WAITING:
             case ADVERTISING:
                 this.expiryDate = newExpiryDate;
+                updateModifiedAt();
                 break;
             case EXPIRED:
                 this.expiryDate = newExpiryDate;
                 this.status = AdvertisementStatus.WAITING;
+                updateModifiedAt();
                 break;
             case DELETED:
                 throw new InvalidExposureDateException();
@@ -147,15 +151,5 @@ public class Advertisement {
         this.expiryDate = newExposureDate.plus(duration);
 
         return duration;
-    }
-
-    //TODO::java 타임존 관련 이슈 해결필요
-    protected void initCreationDate() {
-        this.createdAt = getCurrentTimeWithAsiaTimeZone();
-        this.modifiedAt = getCurrentTimeWithAsiaTimeZone();
-    }
-
-    private LocalDateTime getCurrentTimeWithAsiaTimeZone() {
-        return ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
     }
 }

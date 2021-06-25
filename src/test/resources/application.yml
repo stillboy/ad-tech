@@ -10,16 +10,9 @@ spring:
       database: adtech
       port: 27017
       host: localhost
-
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/adtech?serverTimezone=Asia/Seoul
-    username: root
-    password: qnwk052911!
-
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
     show-sql: true
 
 image:

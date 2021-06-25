@@ -1,9 +1,12 @@
 package com.deali.adtech.infrastructure.repository;
 
 import com.deali.adtech.application.AdvertisementService;
+import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.presentation.dto.AdvertisementSearchCondition;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
+import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
 import com.deali.adtech.presentation.dto.ResponseAdvertisement;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,11 +23,14 @@ import javax.persistence.EntityManager;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.*;
 
-@Disabled
 @Transactional
 @SpringBootTest
 class JpaAdvertisementSearchDaoTest {
@@ -39,43 +45,39 @@ class JpaAdvertisementSearchDaoTest {
     @Autowired
     private JpaAdvertisementSearchDao advertisementSearchDao;
 
+    @BeforeEach
+    public void setUp() {
+        for(int i = 0 ; i < 30; ++i) {
+            Advertisement advertisement = Advertisement.builder()
+                    .title(randomString())
+                    .expiryDate(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime())
+                    .exposureDate(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime())
+                    .winningBid(randomInteger(1,10))
+                    .build();
+
+            advertisementRepository.save(advertisement);
+        }
+    }
+
     @Test
     @DisplayName("소재 상세 정보 조회 성공 테스트")
     public void find_advertisement_by_id_success_test() throws Exception {
-        RequestCreateAdvertisement request = new RequestCreateAdvertisement();
-        request.setTitle("셋업 데이터");
-        request.setWinningBid(5);
-        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
-        request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
-
-        String fileName = "temp2.jpg";
-        MultipartFile multipartFile = buildMockMultipartFile(fileName);
-        request.setImage(multipartFile);
-
-        Long targetId = advertisementService.createAdvertisement(request);
-
-        entityManager.flush();
-        entityManager.clear();
+        Advertisement target = advertisementRepository.findAll().get(0);
 
         ResponseAdvertisement responseAdvertisement = advertisementSearchDao
-                .findAdvertisementById(targetId);
+                .findAdvertisementById(target.getId());
 
         assertThat(responseAdvertisement)
-            .hasFieldOrPropertyWithValue("id", targetId)
-            .hasFieldOrPropertyWithValue("exposureDate", request.getExposureDate())
-            .hasFieldOrPropertyWithValue("expiryDate", request.getExpiryDate())
-            .hasFieldOrPropertyWithValue("winningBid", request.getWinningBid())
-            .hasFieldOrPropertyWithValue("title", request.getTitle());
-
-        assertThat(responseAdvertisement.getImages().size())
-                .isEqualTo(1);
+            .hasFieldOrPropertyWithValue("id", target.getId())
+            .hasFieldOrPropertyWithValue("exposureDate", target.getExposureDate())
+            .hasFieldOrPropertyWithValue("expiryDate", target.getExpiryDate())
+            .hasFieldOrPropertyWithValue("winningBid", target.getWinningBid())
+            .hasFieldOrPropertyWithValue("title", target.getTitle());
     }
 
     @Test
     @DisplayName("소재 목록 조회 성공 테스트")
     public void search_advertisement_success_test() throws Exception {
-        buildRandomAdvertisementList();
-
         Pageable pageable = PageRequest.of(0, 10);
 
         Page<ResponseAdvertisement> result =
@@ -91,23 +93,18 @@ class JpaAdvertisementSearchDaoTest {
                 .isTrue();
     }
 
-    private MultipartFile buildMockMultipartFile(String fileName) throws Exception{
-        return new MockMultipartFile(fileName, new FileInputStream(new File(TEST_PATH+fileName)));
+
+    private String randomString() {
+        Random random = new Random();
+        return  random.ints(48, 122+1)
+                .filter(i -> (i <= 57 || i >= 65) && (i<=90 || i>=97))
+                .limit(10)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 
-    private void buildRandomAdvertisementList() throws Exception {
-        RequestCreateAdvertisement request = new RequestCreateAdvertisement();
-        request.setTitle("셋업 데이터");
-        request.setWinningBid(5);
-        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
-        request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
-
-        String fileName = "temp2.jpg";
-        MultipartFile multipartFile = buildMockMultipartFile(fileName);
-        request.setImage(multipartFile);
-
-        for(int i = 0 ; i < 30; ++i) {
-            advertisementService.createAdvertisement(request);
-        }
+    private int randomInteger(int min, int max) {
+        Random random = new Random();
+        return random.nextInt(max-min+1) + min;
     }
 }

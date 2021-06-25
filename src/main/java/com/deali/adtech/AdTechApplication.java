@@ -10,13 +10,12 @@ import java.util.TimeZone;
 
 @SpringBootApplication
 public class AdTechApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(AdTechApplication.class, args);
     }
 
     @PostConstruct
     public void setUpTimezone() {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
     }
 }

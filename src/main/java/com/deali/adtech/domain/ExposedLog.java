@@ -22,18 +22,18 @@ public class ExposedLog {
     private LocalDateTime modifiedAt;
     @Column(name="EXPOSED_AT", nullable = false)
     private LocalDateTime exposedAt;
+    @Column(name = "WINNING_BID", nullable = false)
+    private Integer winningBid;
     @Column(name="ADVERTISEMENT_ID")
     private Long advertisementId;
 
     @Builder
-    public ExposedLog(Double score, LocalDateTime modifiedAt, Long advertisementId) {
+    public ExposedLog(Double score, LocalDateTime modifiedAt, Integer winningBid,
+                      Long advertisementId) {
         this.score = score;
         this.modifiedAt = modifiedAt;
-        initExposedTime();
+        this.winningBid = winningBid;
+        this.exposedAt = LocalDateTime.now();
         this.advertisementId = advertisementId;
-    }
-
-    private void initExposedTime() {
-        this.exposedAt = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
     }
 }
