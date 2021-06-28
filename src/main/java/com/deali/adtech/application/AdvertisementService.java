@@ -1,6 +1,7 @@
 package com.deali.adtech.application;
 
 import com.deali.adtech.domain.*;
+import com.deali.adtech.infrastructure.exception.ImageUploadFailureException;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
@@ -50,9 +51,9 @@ public class AdvertisementService {
 
         try {
             advertisementImage.uploadImageFile(requestCreateAdvertisement.getImage().getBytes());
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             //TODO::이미지 업로드 익셉션 정의
-            throw new RuntimeException();
+            throw new ImageUploadFailureException();
         }
 
         AdvertisementExposeCount advertisementExposeCount = AdvertisementExposeCount.builder()

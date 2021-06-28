@@ -1,4 +1,4 @@
 package com.deali.adtech.infrastructure.exception;
 
-public class InvalidExposureDateException extends RuntimeException {
+public class InvalidExposureDateException extends BusinessException {
 }

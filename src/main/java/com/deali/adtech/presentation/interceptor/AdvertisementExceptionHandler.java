@@ -1,5 +1,9 @@
 package com.deali.adtech.presentation.interceptor;
 
+import com.deali.adtech.infrastructure.exception.ErrorCode;
+import com.deali.adtech.infrastructure.exception.ImageUploadFailureException;
+import com.deali.adtech.infrastructure.exception.InvalidExpiryDateException;
+import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
@@ -8,8 +12,33 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.Arrays;
+
 @ControllerAdvice
 public class AdvertisementExceptionHandler {
+    @ExceptionHandler(InvalidExposureDateException.class)
+    public ModelAndView handleExposureDateException(InvalidExposureDateException exception) {
+        ModelAndView modelAndView = createModelAndViewWithErrorCode(ErrorCode.INVALID_EXPOSURE_DATE,
+                "home");
+
+        return modelAndView;
+    }
+
+    @ExceptionHandler(InvalidExpiryDateException.class)
+    public ModelAndView handleExpiryDateException(InvalidExpiryDateException exception) {
+        ModelAndView modelAndView = createModelAndViewWithErrorCode(ErrorCode.INVALID_EXPIRY_DATE,
+                "home");
+
+        return modelAndView;
+    }
+
+    @ExceptionHandler(ImageUploadFailureException.class)
+    public ModelAndView handleImageUploadException(ImageUploadFailureException exception) {
+        ModelAndView modelAndView = createModelAndViewWithErrorCode(ErrorCode.IMAGE_UPLOAD_FAIL,
+                "home");
+
+        return modelAndView;
+    }
 
     @ExceptionHandler(BindException.class)
     public ModelAndView handleAdvertisementBindingException(BindException bindException) {
@@ -21,6 +50,18 @@ public class AdvertisementExceptionHandler {
                 bindException.getBindingResult().getAllErrors());
 
         modelAndView.setViewName("home");
+
+        return modelAndView;
+    }
+
+    private ModelAndView createModelAndViewWithErrorCode(ErrorCode errorCode,
+                                                         String viewName) {
+        ModelAndView modelAndView = new ModelAndView();
+
+        modelAndView.setStatus(HttpStatus.valueOf(errorCode.getStatus()));
+        modelAndView.addObject("errors",
+                Arrays.asList(errorCode));
+        modelAndView.setViewName(viewName);
 
         return modelAndView;
     }

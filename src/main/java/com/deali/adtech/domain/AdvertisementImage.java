@@ -1,5 +1,6 @@
 package com.deali.adtech.domain;
 
+import com.deali.adtech.infrastructure.exception.ImageUploadFailureException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,12 +44,15 @@ public class AdvertisementImage {
     }
 
     public void bindAdvertisement(Advertisement advertisement) {
+        //TODO::익셉션 정의
         if(this.advertisement != null) return;
         this.advertisement = advertisement;
     }
 
     public void editNameAndExtension(String fileName) {
-        if(fileName == null || fileName.trim().length() == 0) return;
+        if(fileName == null || fileName.trim().length() == 0) {
+            throw new ImageUploadFailureException();
+        }
         splitNameAndExtension(fileName);
     }
 
@@ -63,7 +67,7 @@ public class AdvertisementImage {
 
     private void splitNameAndExtension(String fileName) {
         if(fileName == null || fileName.trim().length()==0) {
-            throw new RuntimeException();
+            throw new ImageUploadFailureException();
         }
         int lastDot = fileName.lastIndexOf('.');
 
@@ -71,7 +75,6 @@ public class AdvertisementImage {
         this.extension = fileName.substring(lastDot+1, fileName.length());
     }
 
-    //TODO::이미지 업로드 관련 익셉션 정의
     public void uploadImageFile(byte[] fileBytes) {
         if(path == null || fileBytes.length <= 0) return;
 
@@ -79,14 +82,13 @@ public class AdvertisementImage {
                     new FileOutputStream(path+name+"."+extension)) {
             fileOutputStream.write(fileBytes);
         } catch(IOException exception) {
-            throw new RuntimeException();
+            throw new ImageUploadFailureException();
         }
     }
 
     public void exchangeImage(String fileName, Long newSize, byte[] newFileBytes) {
-        //TODO::익셉션 정의 필요, 파일 삭제 실패 예외
         if(!removeImageFile()) {
-            throw new RuntimeException();
+            throw new ImageUploadFailureException();
         }
 
         editNameAndExtension(fileName);
@@ -98,9 +100,8 @@ public class AdvertisementImage {
     private boolean removeImageFile() {
         File file = new File(getFullPathName());
 
-        //TODO::익셉션 정의 필요, 파일이 존재하지 않을 시
         if(!file.exists()) {
-            throw new RuntimeException();
+            throw new ImageUploadFailureException();
         }
 
         return file.delete();

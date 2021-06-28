@@ -47,11 +47,13 @@ class JpaAdvertisementSearchDaoTest {
 
     @BeforeEach
     public void setUp() {
+        LocalDateTime exposureDate = LocalDateTime.now().plusDays(30);
+        LocalDateTime expiryDate = LocalDateTime.from(exposureDate).plusDays(30);
         for(int i = 0 ; i < 30; ++i) {
             Advertisement advertisement = Advertisement.builder()
                     .title(randomString())
-                    .expiryDate(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime())
-                    .exposureDate(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime())
+                    .expiryDate(expiryDate)
+                    .exposureDate(exposureDate)
                     .winningBid(randomInteger(1,10))
                     .build();
 
