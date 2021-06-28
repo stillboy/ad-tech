@@ -14,7 +14,12 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+  h2:
 
 image:
   advertisement:
     default-path: /Users/admin/temp-image/
+
+pool:
+  bid-rate: 0.6
+  date-rate: 0.4

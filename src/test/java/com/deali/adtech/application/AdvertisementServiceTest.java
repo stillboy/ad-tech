@@ -24,10 +24,8 @@ import javax.persistence.EntityNotFoundException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.*;
@@ -47,11 +45,16 @@ class AdvertisementServiceTest {
 
     @BeforeEach
     public void setUp() {
+        LocalDateTime exposureDate = LocalDateTime.now();
+        exposureDate = exposureDate.plusDays(30);
+
+        LocalDateTime expiryDate = exposureDate.plusDays(30);
+
         RequestCreateAdvertisement request = new RequestCreateAdvertisement();
         request.setTitle("셋업 데이터");
         request.setWinningBid(5);
-        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
-        request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
+        request.setExposureDate(exposureDate);
+        request.setExpiryDate(expiryDate);
 
         String fileName = "temp2.jpg";
         MultipartFile multipartFile = buildMockMultipartFile(fileName);
@@ -216,7 +219,7 @@ class AdvertisementServiceTest {
 
         RequestPostPoneAdvertisement request = new RequestPostPoneAdvertisement();
         request.setAdvertisementId(target.getId());
-        request.setExposureDate(LocalDateTime.of(2021,6,20,12,00));
+        request.setExposureDate(LocalDateTime.from(target.getExposureDate()).plusDays(30));
 
         Duration originDuration = Duration.between(target.getExposureDate(), target.getExpiryDate());
 
@@ -238,13 +241,13 @@ class AdvertisementServiceTest {
     }
 
     @Test
-    @DisplayName("소재 기간 연장 선공 테스트 케이스")
+    @DisplayName("소재 기간 연장 성공 테스트 케이스")
     public void extend_advertisement_success_test()  {
         /* given */
         Advertisement target = advertisementRepository.findById(testAdvertisementId)
                 .orElseThrow(EntityNotFoundException::new);
 
-        LocalDateTime newExpiryDate = LocalDateTime.of(2021,7,25,12,00);
+        LocalDateTime newExpiryDate = LocalDateTime.from(target.getExpiryDate()).plusDays(30);
 
         RequestExtendAdvertisement request = new RequestExtendAdvertisement();
         request.setAdvertisementId(target.getId());
@@ -295,11 +298,16 @@ class AdvertisementServiceTest {
     }
 
     private RequestCreateAdvertisement buildRequestCreatedAdvertisement() {
+        LocalDateTime exposureDate = LocalDateTime.now();
+        exposureDate = exposureDate.plusDays(30);
+
+        LocalDateTime expiryDate = exposureDate.plusDays(30);
+
         RequestCreateAdvertisement request = new RequestCreateAdvertisement();
         request.setTitle(randomString());
         request.setWinningBid(1);
-        request.setExposureDate(LocalDateTime.of(2021,6,18,12,00));
-        request.setExpiryDate(LocalDateTime.of(2021,6,30,12,00));
+        request.setExposureDate(exposureDate);
+        request.setExpiryDate(expiryDate);
 
         String fileName = "temp2.jpg";
         MultipartFile multipartFile = buildMockMultipartFile(fileName);

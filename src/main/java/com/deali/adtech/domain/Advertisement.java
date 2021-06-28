@@ -52,11 +52,11 @@ public class Advertisement {
                          LocalDateTime exposureDate) {
         this.title = title;
         this.winningBid = winningBid;
-        this.expiryDate = expiryDate;
-        this.exposureDate = exposureDate;
-        this.status = AdvertisementStatus.WAITING;
         this.createdAt = LocalDateTime.now();
         this.modifiedAt = LocalDateTime.from(this.createdAt);
+        initExposureDate(exposureDate);
+        initExpiryDate(expiryDate);
+        this.status = AdvertisementStatus.WAITING;
     }
 
     public void editTitle(String title) {
@@ -113,6 +113,7 @@ public class Advertisement {
     }
 
     public void extend(LocalDateTime newExpiryDate) {
+        //TODO::익셉션 정의
         if(newExpiryDate.isBefore(exposureDate) || newExpiryDate.isBefore(expiryDate)) {
             throw new RuntimeException();
         }
@@ -135,7 +136,7 @@ public class Advertisement {
 
     public void remove() {
         if(status == AdvertisementStatus.DELETED) {
-            throw new InvalidRemoveRequestException();
+            throw new AlreadyRemovedAdvertisementException();
         }
 
         status = AdvertisementStatus.DELETED;
@@ -147,5 +148,25 @@ public class Advertisement {
         this.expiryDate = newExposureDate.plus(duration);
 
         return duration;
+    }
+
+    private void initExposureDate(LocalDateTime exposureDate) {
+        if(exposureDate.isBefore(this.createdAt)) {
+            throw new InvalidExposureDateException();
+        }
+
+        this.exposureDate = exposureDate;
+    }
+
+    private void initExpiryDate(LocalDateTime expiryDate) {
+        if(expiryDate.isBefore(this.createdAt)) {
+            throw new InvalidExpiryDateException();
+        }
+
+        if(this.exposureDate == null || expiryDate.isBefore(this.exposureDate)) {
+            throw new InvalidExpiryDateException();
+        }
+
+        this.expiryDate = expiryDate;
     }
 }

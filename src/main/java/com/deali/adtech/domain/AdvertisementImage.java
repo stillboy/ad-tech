@@ -62,12 +62,16 @@ public class AdvertisementImage {
     }
 
     private void splitNameAndExtension(String fileName) {
+        if(fileName == null || fileName.trim().length()==0) {
+            throw new RuntimeException();
+        }
         int lastDot = fileName.lastIndexOf('.');
 
         this.name = UUID.randomUUID().toString();
         this.extension = fileName.substring(lastDot+1, fileName.length());
     }
 
+    //TODO::이미지 업로드 관련 익셉션 정의
     public void uploadImageFile(byte[] fileBytes) {
         if(path == null || fileBytes.length <= 0) return;
 

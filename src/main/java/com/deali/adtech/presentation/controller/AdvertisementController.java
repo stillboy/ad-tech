@@ -10,9 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.validation.Valid;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Base64;
@@ -32,14 +35,14 @@ public class AdvertisementController {
     }
 
     @GetMapping("/post")
-    public ModelAndView createCreativeView(ModelAndView modelAndView) {
+    public ModelAndView createAdvertisementView(ModelAndView modelAndView) {
         modelAndView.setViewName("creativeForm");
 
         return modelAndView;
     }
 
     @PostMapping("/post")
-    public String createCreative(@ModelAttribute RequestCreateAdvertisement requestCreateAdvertisement,
+    public String createAdvertisement(@Valid @ModelAttribute RequestCreateAdvertisement requestCreateAdvertisement,
                                  ModelAndView modelAndView) {
 
         advertisementService.createAdvertisement(requestCreateAdvertisement);
@@ -48,7 +51,7 @@ public class AdvertisementController {
     }
 
     @GetMapping("/{advertisementId}")
-    public ModelAndView getCreativeDetails(@PathVariable(name = "advertisementId") Long id,
+    public ModelAndView getAdvertisementDetails(@PathVariable(name = "advertisementId") Long id,
                                            ModelAndView modelAndView) throws IOException {
 
         ResponseAdvertisement result =  advertisementSearchDao.findAdvertisementById(id);
@@ -61,7 +64,7 @@ public class AdvertisementController {
     }
 
     @PostMapping("/update/{advertisementId}")
-    public String editCreative(@PathVariable(name="advertisementId") Long advertisementId,
+    public String editAdvertisement(@PathVariable(name="advertisementId") Long advertisementId,
             @ModelAttribute RequestEditAdvertisement requestEditAdvertisement) {
 
         requestEditAdvertisement.setId(advertisementId);
@@ -71,7 +74,7 @@ public class AdvertisementController {
     }
 
     @GetMapping("/list")
-    public ModelAndView getCreativeList(@RequestParam(name = "pageNumber") int pageNumber,
+    public ModelAndView getAdvertisementList(@RequestParam(name = "pageNumber") int pageNumber,
                                         @RequestParam(name = "pageSize") int pageSize,
                                         ModelAndView modelAndView) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -86,7 +89,7 @@ public class AdvertisementController {
     }
 
     @PostMapping("/{advertisementId}/delete")
-    public String deleteCreative(@PathVariable(name = "advertisementId") Long id) {
+    public String deleteAdvertisement(@PathVariable(name = "advertisementId") Long id) {
         advertisementService.removeAdvertisement(id);
 
         return "redirect:/core/v1/creative";
