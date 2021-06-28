@@ -7,6 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface AdvertisementDocumentRepository {
-    List<ResponseCreative> searchTop10Advertisement();
+    List<ResponseCreative> searchTop10Advertisement(double bidRate, double dateRate);
     HashMap<String,Number> searchMinMaxWinningBidAndModifiedAt();
 }

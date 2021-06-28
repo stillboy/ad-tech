@@ -16,12 +16,12 @@ import static org.springframework.data.mongodb.core.schema.JsonSchemaObject.*;
 
 @RequiredArgsConstructor
 @Repository
-public class AdvertisementDocumentMongoRepository
+public class MongoAdvertisementDocumentRepository
         implements AdvertisementDocumentRepository {
     private final MongoTemplate mongoTemplate;
 
     @Override
-    public List<ResponseCreative> searchTop10Advertisement() {
+    public List<ResponseCreative> searchTop10Advertisement(double bidRate, double dateRate) {
         HashMap<String, Number> map = searchMinMaxWinningBidAndModifiedAt();
 
         Integer maxBid = (Integer)map.get("maxBid");
@@ -33,11 +33,11 @@ public class AdvertisementDocumentMongoRepository
                 .project("_id","title","winningBid","modifiedAt","expiryDate",
                         "advertisementId","imagePath")
                 .and(add(
-                        multiply(0.4,
+                        multiply(bidRate,
                                 divide(subtract(convert("modifiedAt", Type.INT_64), minDate),
                                         maxDate-minDate)
                                 ),
-                        multiply(0.6, divide(subtract("winningBid", minBid), maxBid-minBid))
+                        multiply(dateRate, divide(subtract("winningBid", minBid), maxBid-minBid))
                 ))
                 .as("score");
 

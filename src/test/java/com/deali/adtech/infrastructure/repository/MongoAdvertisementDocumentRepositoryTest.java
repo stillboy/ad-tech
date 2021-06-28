@@ -10,7 +10,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
-class AdvertisementDocumentMongoRepositoryTest {
+class MongoAdvertisementDocumentRepositoryTest {
     @Autowired
     private AdvertisementDocumentRepository advertisementDocumentRepository;
 
@@ -38,8 +38,10 @@ class AdvertisementDocumentMongoRepositoryTest {
     @DisplayName("광고 소재 풀 노출될 상위 10개의 소재 조회 테스트")
     public void search_Top_10_advertisement_success_test() {
         /* given */
+        double bidRate = 0.6;
+        double dateRate = 0.4;
         List<ResponseCreative> results =
-                advertisementDocumentRepository.searchTop10Advertisement();
+                advertisementDocumentRepository.searchTop10Advertisement(bidRate, dateRate);
 
         ResponseCreative max = results.get(0);
         ResponseCreative min = results.get(results.size()-1);
