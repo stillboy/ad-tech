@@ -2,6 +2,7 @@ package com.deali.adtech.domain;
 
 import com.querydsl.core.annotations.QueryEntity;
 import lombok.Getter;
+import lombok.ToString;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 
 @QueryEntity
 @Getter
+@ToString
 @Document(collection = "advertisement")
 public class AdvertisementDocument {
     @Id

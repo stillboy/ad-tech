@@ -61,7 +61,7 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
         List<String> imagePathList = new ArrayList<>();
 
         images.forEach(image -> {
-            imagePathList.add(image.getFullPathName());
+            imagePathList.add(image.getNameAndExtension());
         });
 
         responseAdvertisement.setImages(imagePathList);

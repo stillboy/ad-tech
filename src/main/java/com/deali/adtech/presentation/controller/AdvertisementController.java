@@ -10,8 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -56,8 +54,7 @@ public class AdvertisementController {
 
         ResponseAdvertisement result =  advertisementSearchDao.findAdvertisementById(id);
         modelAndView.addObject("creative", result);
-        modelAndView.addObject("image", convertFile(result.getImages().get(0)));
-        modelAndView.addObject("extension", getExtension(result.getImages().get(0)));
+
         modelAndView.setViewName("detail");
 
         return modelAndView;

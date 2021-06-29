@@ -18,7 +18,7 @@ spring:
 
 image:
   advertisement:
-    default-path: /Users/admin/temp-image/
+    default-path: /Users/admin/IdeaProjects/ad-tech/src/main/resources/static/
 
 pool:
   bid-rate: 0.6

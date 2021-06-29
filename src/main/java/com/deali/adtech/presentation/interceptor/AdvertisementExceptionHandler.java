@@ -1,27 +1,30 @@
 package com.deali.adtech.presentation.interceptor;
 
-import com.deali.adtech.infrastructure.exception.ErrorCode;
-import com.deali.adtech.infrastructure.exception.ImageUploadFailureException;
-import com.deali.adtech.infrastructure.exception.InvalidExpiryDateException;
-import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
-import org.springframework.core.convert.ConversionFailedException;
+import com.deali.adtech.infrastructure.exception.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Arrays;
 
 @ControllerAdvice
 public class AdvertisementExceptionHandler {
-    @ExceptionHandler(InvalidExposureDateException.class)
-    public ModelAndView handleExposureDateException(InvalidExposureDateException exception) {
-        ModelAndView modelAndView = createModelAndViewWithErrorCode(ErrorCode.INVALID_EXPOSURE_DATE,
-                "home");
 
-        return modelAndView;
+    @ExceptionHandler(InvalidExposureDateException.class)
+    @ResponseBody
+    public ResponseEntity handleExposureDateException(InvalidExposureDateException exception) throws JsonProcessingException {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.INVALID_EXPOSURE_DATE)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
     @ExceptionHandler(InvalidExpiryDateException.class)

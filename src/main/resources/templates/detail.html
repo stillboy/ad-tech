@@ -15,8 +15,8 @@
     <li th:text="'광고 만료일: ' + ${creative.expiryDate}"></li>
     <li th:text="'광고 상태: ' + ${creative.status}"></li>
     <li th:text="'노출 횟수: ' + ${creative.exposeCount}"></li>
+    <li th:each=" image : ${creative.images}"><img th:src="'/'+${image}"></li>
   </ul>
-  <img th:src="'data:image/'+${extension}+';base64, ' + ${image}">
 
   <form th:action="'/core/v1/creative/update/' + ${creative.id}" th:method="post" enctype="multipart/form-data">
     <div>수정할 제목: <input type='text' name='title'/></div>

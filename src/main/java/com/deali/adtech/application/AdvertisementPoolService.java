@@ -16,15 +16,9 @@ import java.util.List;
 public class AdvertisementPoolService {
     private final MongoAdvertisementDocumentRepository mongoRepository;
 
-    @Value("${pool.bid-rate}")
-    private double bidRate;
-    @Value("${pool.date-rate}")
-    private double dateRate;
-
     @AdvertisementExposed
     public List<ResponseCreative> getTop10Advertisement() {
-        List<ResponseCreative> results =
-                mongoRepository.searchTop10Advertisement(bidRate, dateRate);
+        List<ResponseCreative> results = mongoRepository.searchTop10Advertisement();
 
         return results;
     }

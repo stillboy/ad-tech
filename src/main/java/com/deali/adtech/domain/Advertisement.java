@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -95,7 +96,7 @@ public class Advertisement {
     }
 
     public void postpone(LocalDateTime newExposureDate) {
-        if(newExposureDate.isBefore(exposureDate)) {
+        if(newExposureDate == null || newExposureDate.isBefore(exposureDate)) {
             throw new InvalidExposureDateException();
         }
 
@@ -113,9 +114,10 @@ public class Advertisement {
     }
 
     public void extend(LocalDateTime newExpiryDate) {
-        //TODO::익셉션 정의
-        if(newExpiryDate.isBefore(exposureDate) || newExpiryDate.isBefore(expiryDate)) {
-            throw new RuntimeException();
+        if(newExpiryDate == null
+                || newExpiryDate.isBefore(exposureDate)
+                || newExpiryDate.isBefore(expiryDate)) {
+            throw new InvalidExpiryDateException();
         }
 
         switch (status) {
@@ -142,7 +144,11 @@ public class Advertisement {
         status = AdvertisementStatus.DELETED;
     }
 
-    private Duration calculateRemainingTime(LocalDateTime newExposureDate) {
+    protected Duration calculateRemainingTime(LocalDateTime newExposureDate) {
+        if(newExposureDate == null) {
+            throw new InvalidExposureDateException();
+        }
+
         Duration duration = Duration.between(exposureDate, expiryDate);
         this.exposureDate = newExposureDate;
         this.expiryDate = newExposureDate.plus(duration);
@@ -150,16 +156,16 @@ public class Advertisement {
         return duration;
     }
 
-    private void initExposureDate(LocalDateTime exposureDate) {
-        if(exposureDate.isBefore(this.createdAt)) {
+    protected void initExposureDate(LocalDateTime exposureDate) {
+        if(exposureDate == null || exposureDate.isBefore(this.createdAt)) {
             throw new InvalidExposureDateException();
         }
 
         this.exposureDate = exposureDate;
     }
 
-    private void initExpiryDate(LocalDateTime expiryDate) {
-        if(expiryDate.isBefore(this.createdAt)) {
+    protected void initExpiryDate(LocalDateTime expiryDate) {
+        if(expiryDate == null || expiryDate.isBefore(this.createdAt)) {
             throw new InvalidExpiryDateException();
         }
 

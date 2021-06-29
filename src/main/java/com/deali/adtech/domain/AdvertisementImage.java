@@ -65,7 +65,11 @@ public class AdvertisementImage {
         return path + name + "." + extension;
     }
 
-    private void splitNameAndExtension(String fileName) {
+    public String getNameAndExtension() {
+        return name + "." + extension;
+    }
+
+    protected void splitNameAndExtension(String fileName) {
         if(fileName == null || fileName.trim().length()==0) {
             throw new ImageUploadFailureException();
         }
@@ -75,6 +79,7 @@ public class AdvertisementImage {
         this.extension = fileName.substring(lastDot+1, fileName.length());
     }
 
+    //TODO::이미지 업로드 로직 도메인 서비스로 분리?
     public void uploadImageFile(byte[] fileBytes) {
         if(path == null || fileBytes.length <= 0) return;
 
@@ -97,7 +102,7 @@ public class AdvertisementImage {
         uploadImageFile(newFileBytes);
     }
 
-    private boolean removeImageFile() {
+    protected boolean removeImageFile() {
         File file = new File(getFullPathName());
 
         if(!file.exists()) {

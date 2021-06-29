@@ -1,31 +1,33 @@
 package com.deali.adtech.presentation.controller;
 
+import com.deali.adtech.domain.Advertisement;
+import com.deali.adtech.domain.AdvertisementImage;
 import com.deali.adtech.infrastructure.exception.ImageUploadFailureException;
 import com.deali.adtech.infrastructure.exception.InvalidExpiryDateException;
 import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
-import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
-import org.assertj.core.api.Assertions;
+import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
+import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,6 +36,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.beans.HasPropertyWithValue.*;
+import static org.hamcrest.core.IsEqual.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
@@ -44,14 +48,43 @@ class AdvertisementControllerTest {
     private MockMvc mockMvc;
     private final static String DEFAULT_PATH = "/core/v1/creative";
     private static final String TEST_PATH = "/Users/admin/temp-image/";
+    @Autowired
+    private AdvertisementRepository advertisementRepository;
+    @Autowired
+    private AdvertisementImageRepository imageRepository;
+    private Long targetId;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
         /* given */
+        LocalDateTime exposureDate = LocalDateTime.now().plusDays(30);
+        LocalDateTime expiryDate = LocalDateTime.from(exposureDate).plusDays(30);
+
+        Advertisement advertisement = Advertisement.builder()
+                .title("title1")
+                .winningBid(5)
+                .expiryDate(expiryDate)
+                .exposureDate(exposureDate)
+                .build();
+
+        AdvertisementImage advertisementImage = AdvertisementImage.builder()
+                .name("temp2.jpg")
+                .path(TEST_PATH)
+                .size(1000L)
+                .build();
+
+        advertisementImage.bindAdvertisement(advertisement);
 
         /* when */
 
+        advertisement = advertisementRepository.save(advertisement);
+
         /* then */
+        this.targetId = advertisement.getId();
+        entityManager.flush();
+        entityManager.clear();
     }
 
     @Test
@@ -318,7 +351,92 @@ class AdvertisementControllerTest {
     @Test
     @DisplayName("edit advertisement 성공 테스트 변경할 이미지가 없는 경우")
     public void edit_advertisement_success_test() throws Exception{
+        /* given */
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("title", "editedTitle");
+        map.add("winningBid", "10");
+        map.add("id", targetId.toString());
 
+        /* when */
+        mockMvc.perform(MockMvcRequestBuilders
+                .post(DEFAULT_PATH+"/update"+"/"+targetId.toString())
+                .params(map))
+                .andExpect(status().is3xxRedirection());
+        /* then */
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("edit advertisement 성공 테스트 변경할 이미지가 있는 경우")
+    public void edit_advertisement_success_test_with_image() throws Exception {
+        /* given */
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("title", "editedTitle");
+        map.add("winningBid", "10");
+        map.add("id", targetId.toString());
+
+        MockMultipartFile file = buildMockMultipartFile("temp2.jpg");
+
+        MockPart mockPart = new MockPart("newImage", file.getOriginalFilename(),
+                file.getBytes());
+
+        /* when */
+        mockMvc.perform(MockMvcRequestBuilders
+                .multipart(DEFAULT_PATH+"/update"+"/"+targetId.toString())
+                .part(mockPart)
+                .params(map))
+                .andExpect(status().isOk());
+
+        /* then */
+    }
+
+
+    @Test
+    @DisplayName("delete advertisement 성공 테스트")
+    public void delete_advertisement_success_test() throws Exception {
+        /* given */
+
+        /* when */
+        mockMvc.perform(MockMvcRequestBuilders
+                .post(DEFAULT_PATH+"/"+targetId.toString()+"/delete"))
+                .andExpect(status().is3xxRedirection());
+        /* then */
+    }
+
+    @Test
+    @DisplayName("get advertisement list 성공 테스트")
+    public void get_advertisement_list_success_test() throws Exception {
+        /* given */
+
+        /* when */
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(DEFAULT_PATH+"/list")
+                .queryParam("pageNumber", "0")
+                .queryParam("pageSize","10"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("page", "creativeList"));
+        /* then */
+    }
+
+    @Test
+    @DisplayName("get advertisement details 성공 테스트")
+    public void get_advertisement_details_success_test() throws Exception {
+        /* given */
+        Advertisement target = advertisementRepository
+                .findById(targetId).orElseThrow(EntityNotFoundException::new);
+
+        /* when */
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(DEFAULT_PATH+"/"+targetId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("detail"))
+                .andExpect(model().attribute("creative",
+                        hasProperty("title", equalTo(target.getTitle()))))
+                .andExpect(model().attribute("creative",
+                        hasProperty("winningBid", equalTo(target.getWinningBid())))
+                );
+
+        /* then */
     }
 
     private MockMultipartFile buildMockMultipartFile(String fileName) {

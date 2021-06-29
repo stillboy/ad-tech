@@ -34,7 +34,6 @@ public class AdvertisementService {
     @Value("${image.advertisement.default-path}")
     private String defaultPath;
 
-    //TODO::생성시에 광고 노출 시작일자와 만료일자에 대한 검증이 있어야 한다.
     public Long createAdvertisement(@NonNull RequestCreateAdvertisement requestCreateAdvertisement) {
 
         Advertisement advertisement = AdvertisementMapper.INSTANCE
@@ -52,7 +51,6 @@ public class AdvertisementService {
         try {
             advertisementImage.uploadImageFile(requestCreateAdvertisement.getImage().getBytes());
         } catch (Exception exception) {
-            //TODO::이미지 업로드 익셉션 정의
             throw new ImageUploadFailureException();
         }
 
@@ -83,6 +81,8 @@ public class AdvertisementService {
             }
         }
     }
+
+    //TODO::노출 기간을 줄이는 것에 대한 로직 필요, 날짜 관련 로직을 하나로 처리?
 
     public void postponeAdvertisement(@NonNull RequestPostPoneAdvertisement requestPostPoneAdvertisement) {
         Advertisement advertisement = getAdvertisementEntity(requestPostPoneAdvertisement.getAdvertisementId());

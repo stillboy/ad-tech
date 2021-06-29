@@ -1,18 +1,17 @@
 package com.deali.adtech.infrastructure.repository;
 
+import com.deali.adtech.domain.AdvertisementDocument;
+import com.deali.adtech.infrastructure.util.mapper.AdvertisementDocumentMapper;
 import com.deali.adtech.presentation.dto.ResponseCreative;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.*;
-import org.springframework.data.mongodb.core.schema.JsonSchemaObject;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import static org.springframework.data.mongodb.core.schema.JsonSchemaObject.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
@@ -20,107 +19,72 @@ public class MongoAdvertisementDocumentRepository
         implements AdvertisementDocumentRepository {
     private final MongoTemplate mongoTemplate;
 
-    @Override
-    public List<ResponseCreative> searchTop10Advertisement(double bidRate, double dateRate) {
-        HashMap<String, Number> map = searchMinMaxWinningBidAndModifiedAt();
+    @Value("${pool.bid-rate}")
+    private Double bidRate;
+    @Value("${pool.date-rate}")
+    private Double dateRate;
 
-        Integer maxBid = (Integer)map.get("maxBid");
+    @Override
+    public List<ResponseCreative> searchTop10Advertisement() {
+        List<AdvertisementDocument> results = mongoTemplate.findAll(AdvertisementDocument.class);
+
+        Map<String, Number> map = getMinMaxWinningBidAndModifiedAt(results);
+
+        List<ResponseCreative> responseCreativeList =
+                results.stream()
+                .map(document -> {
+                    int bid = document.getWinningBid();
+                    LocalDateTime time = document.getModifiedAt();
+                    double score = calculateScore(bid, time, map);
+                    return AdvertisementDocumentMapper.INSTANCE.documentToDto(document, score);
+                })
+                        .sorted((d1,d2)->d2.getScore().compareTo(d1.getScore()))
+                        .limit(10)
+                        .collect(Collectors.toList());
+
+        return responseCreativeList;
+    }
+
+    private Double calculateScore(int bid, LocalDateTime time, Map<String, Number> map) {
         Integer minBid = (Integer)map.get("minBid");
-        Long maxDate = (Long)map.get("maxDate");
+        Integer maxBid = (Integer)map.get("maxBid");
         Long minDate = (Long)map.get("minDate");
+        Long maxDate = (Long)map.get("maxDate");
 
-        ProjectionOperation projectionOperation = Aggregation
-                .project("_id","title","winningBid","modifiedAt","expiryDate",
-                        "advertisementId","imagePath")
-                .and(add(
-                        multiply(bidRate,
-                                divide(subtract(convert("modifiedAt", Type.INT_64), minDate),
-                                        maxDate-minDate)
-                                ),
-                        multiply(dateRate, divide(subtract("winningBid", minBid), maxBid-minBid))
-                ))
-                .as("score");
+        long convertedTime = time.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond()*1000;
 
-
-        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "score");
-
-        LimitOperation limitOperation = Aggregation.limit(10);
-
-        Aggregation aggregation =
-                Aggregation.newAggregation(projectionOperation, sortOperation, limitOperation);
-
-        AggregationResults<ResponseCreative> results = mongoTemplate
-                .aggregate(aggregation, "advertisement", ResponseCreative.class);
-
-        return results.getMappedResults();
+        return ((bid-minBid)/(double)(maxBid-minBid))*bidRate
+                + ((convertedTime-minDate)/(double)(maxDate-minDate))*dateRate;
     }
 
-    @Override
-    public HashMap<String,Number> searchMinMaxWinningBidAndModifiedAt() {
-       GroupOperation groupOperation = Aggregation.group()
-               .max("winningBid")
-               .as("maxBid")
-               .min("winningBid")
-               .as("minBid")
-               .max("modifiedAt")
-               .as("maxDate")
-               .min("modifiedAt")
-               .as("minDate");
+    private Map<String, Number> getMinMaxWinningBidAndModifiedAt(List<AdvertisementDocument> advertisements) {
+        //TODO::익셉션 정의 필요
+        if(advertisements == null || advertisements.size() == 0) {
+            throw new RuntimeException();
+        }
 
-       Aggregation aggregation = Aggregation.newAggregation(groupOperation);
+        Map<String, Number> resultMap = new HashMap<>();
 
-       AggregationResults<HashMap> results =
-               mongoTemplate.aggregate(aggregation, "advertisement", HashMap.class);
+        Integer minBid = Integer.MAX_VALUE, maxBid = Integer.MIN_VALUE;
+        Long minDate = Long.MAX_VALUE, maxDate = Long.MIN_VALUE;
 
-       //TODO::런타임 익셉션 정의와 핸들링 선언하기
-       if(results.getUniqueMappedResult() == null) {
-           throw new RuntimeException();
-       }
+        for(AdvertisementDocument advertisement : advertisements) {
+            int currentBid = advertisement.getWinningBid();
+            long currentDate = advertisement.getModifiedAt().atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
 
-       HashMap result = results.getUniqueMappedResult();
+            if(minBid > currentBid) minBid = advertisement.getWinningBid();
+            if(maxBid < currentBid) maxBid = advertisement.getWinningBid();
+            if(minDate > currentDate) minDate = currentDate;
+            if(maxDate < currentDate) maxDate = currentDate;
+        }
 
-       Date maxDate = (Date)result.get("maxDate");
-       Date minDate = (Date)result.get("minDate");
+        minDate *= 1000; maxDate *= 1000;
 
-       result.replace("maxDate", maxDate.getTime());
-       result.replace("minDate", minDate.getTime());
+        resultMap.put("minBid", minBid);
+        resultMap.put("maxBid", maxBid);
+        resultMap.put("minDate", minDate);
+        resultMap.put("maxDate", maxDate);
 
-       return result;
-    }
-
-    private AggregationExpression add(AggregationExpression left, AggregationExpression right) {
-        return ArithmeticOperators.Add.valueOf(left).add(right);
-    }
-
-    private AggregationExpression multiply(AggregationExpression left, AggregationExpression right) {
-        return ArithmeticOperators.Multiply.valueOf(left).multiplyBy(right);
-    }
-
-    private AggregationExpression multiply(Number left, AggregationExpression right) {
-        return ArithmeticOperators.Multiply.valueOf(left).multiplyBy(right);
-    }
-
-    private AggregationExpression divide(AggregationExpression left, AggregationExpression right) {
-        return ArithmeticOperators.Divide.valueOf(left).divideBy(right);
-    }
-
-    private AggregationExpression divide(AggregationExpression left, Number right) {
-        return ArithmeticOperators.Divide.valueOf(left).divideBy(right);
-    }
-
-    private AggregationExpression subtract(AggregationExpression left, AggregationExpression right) {
-        return ArithmeticOperators.Subtract.valueOf(left).subtract(right);
-    }
-
-    private AggregationExpression subtract(AggregationExpression left, Number right) {
-        return ArithmeticOperators.Subtract.valueOf(left).subtract(right);
-    }
-
-    private AggregationExpression subtract(String left, Number right) {
-        return ArithmeticOperators.Subtract.valueOf(left).subtract(right);
-    }
-
-    private AggregationExpression convert(String fieldName, Type type) {
-        return ConvertOperators.Convert.convertValueOf(fieldName).to(type);
+        return resultMap;
     }
 }

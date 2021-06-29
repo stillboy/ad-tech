@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
-//TODO:: 광고 생성일, 광고 개시 시작일 차이를 둘 것인가
 @Data
 public class RequestCreateAdvertisement {
     @NotNull(message = "광고 제목을 입력해주세요.")
