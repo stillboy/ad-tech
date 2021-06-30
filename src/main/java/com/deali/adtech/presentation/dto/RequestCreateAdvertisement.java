@@ -22,11 +22,11 @@ public class RequestCreateAdvertisement {
     private Integer winningBid;
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime exposureDate;
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime expiryDate;
 
     private MultipartFile image;

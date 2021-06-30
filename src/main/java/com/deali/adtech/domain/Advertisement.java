@@ -4,6 +4,7 @@ import com.deali.adtech.infrastructure.exception.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -85,17 +86,43 @@ public class Advertisement {
         this.modifiedAt = currentTime;
     }
 
-    public void editAdvertisement(String title, Integer winningBid) {
+    public void editAdvertisement(String title, Integer winningBid, LocalDateTime exposureDate,
+                                  LocalDateTime expiryDate) {
+
         if(status == AdvertisementStatus.DELETED) {
             throw new AlreadyRemovedAdvertisementException();
         }
 
         editTitle(title);
         changeWinningBid(winningBid);
+        changeAdvertisingDuration(exposureDate, expiryDate);
         updateModifiedAt();
     }
 
-    public void postpone(LocalDateTime newExposureDate) {
+    //TODO::spring fsm 으로 변경 가능할 듯
+    protected void changeAdvertisingDuration(LocalDateTime exposureDate, LocalDateTime expiryDate) {
+        //TODO::유효성 검증 따로 분리
+        if(expiryDate == null || exposureDate == null || expiryDate.isBefore(exposureDate) ||
+        exposureDate.isBefore(this.exposureDate)) {
+            throw new InvalidChangeDurationException();
+        }
+
+        if(exposureDate.equals(this.exposureDate) && expiryDate.equals(this.exposureDate)) return ;
+
+        if(expiryDate.isAfter(this.expiryDate)) {
+            extend(expiryDate);
+        }
+
+        if(exposureDate.isAfter(this.exposureDate)) {
+            postpone(exposureDate);
+        }
+
+        if(expiryDate.isBefore(this.expiryDate)) {
+            reduce(expiryDate);
+        }
+    }
+
+    protected void postpone(LocalDateTime newExposureDate) {
         if(newExposureDate == null || newExposureDate.isBefore(exposureDate)) {
             throw new InvalidExposureDateException();
         }
@@ -103,17 +130,18 @@ public class Advertisement {
         switch (status) {
             case WAITING:
             case ADVERTISING:
-                calculateRemainingTime(newExposureDate);
+                //TODO::남은 기간을 계산하는게 필요한가 이러면?
+                //calculateRemainingTime(newExposureDate);
                 status = AdvertisementStatus.WAITING;
-                updateModifiedAt();
                 break;
             case EXPIRED:
             case DELETED:
-                throw new InvalidPostponeRequestException();
+            default:
+                throw new InvalidExposureDateException();
         }
     }
 
-    public void extend(LocalDateTime newExpiryDate) {
+    protected void extend(LocalDateTime newExpiryDate) {
         if(newExpiryDate == null
                 || newExpiryDate.isBefore(exposureDate)
                 || newExpiryDate.isBefore(expiryDate)) {
@@ -124,15 +152,30 @@ public class Advertisement {
             case WAITING:
             case ADVERTISING:
                 this.expiryDate = newExpiryDate;
-                updateModifiedAt();
                 break;
             case EXPIRED:
                 this.expiryDate = newExpiryDate;
                 this.status = AdvertisementStatus.WAITING;
-                updateModifiedAt();
                 break;
             case DELETED:
-                throw new InvalidExposureDateException();
+            default:
+                throw new InvalidExpiryDateException();
+        }
+    }
+
+    protected void reduce(LocalDateTime newExpiryDate) {
+        if(newExpiryDate == null || newExpiryDate.isAfter(this.expiryDate)) {
+            throw new InvalidExpiryDateException();
+        }
+
+        switch (status) {
+            case WAITING:
+            case ADVERTISING:
+
+            case EXPIRED:
+            case DELETED:
+            default:
+                throw  new InvalidExpiryDateException();
         }
     }
 

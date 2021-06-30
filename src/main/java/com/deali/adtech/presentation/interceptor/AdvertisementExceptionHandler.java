@@ -8,16 +8,16 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Arrays;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class AdvertisementExceptionHandler {
 
     @ExceptionHandler(InvalidExposureDateException.class)
-    @ResponseBody
-    public ResponseEntity handleExposureDateException(InvalidExposureDateException exception) throws JsonProcessingException {
+    public ResponseEntity handleExposureDateException(InvalidExposureDateException exception) {
         ErrorResponse response = ErrorResponse.builder()
                 .errorCode(ErrorCode.INVALID_EXPOSURE_DATE)
                 .build();

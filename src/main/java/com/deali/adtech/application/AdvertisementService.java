@@ -67,7 +67,9 @@ public class AdvertisementService {
         Advertisement advertisement = getAdvertisementEntity(requestEditAdvertisement.getId());
 
         advertisement.editAdvertisement(requestEditAdvertisement.getTitle(),
-                requestEditAdvertisement.getWinningBid());
+                requestEditAdvertisement.getWinningBid(),
+                requestEditAdvertisement.getExposureDate(),
+                requestEditAdvertisement.getExpiryDate());
 
         MultipartFile newImage = requestEditAdvertisement.getNewImage();
 
@@ -82,17 +84,6 @@ public class AdvertisementService {
         }
     }
 
-    //TODO::노출 기간을 줄이는 것에 대한 로직 필요, 날짜 관련 로직을 하나로 처리?
-
-    public void postponeAdvertisement(@NonNull RequestPostPoneAdvertisement requestPostPoneAdvertisement) {
-        Advertisement advertisement = getAdvertisementEntity(requestPostPoneAdvertisement.getAdvertisementId());
-        advertisement.postpone(requestPostPoneAdvertisement.getExposureDate());
-    }
-
-    public void extendAdvertisement(@NonNull RequestExtendAdvertisement requestExtendAdvertisement) {
-        Advertisement advertisement = getAdvertisementEntity(requestExtendAdvertisement.getAdvertisementId());
-        advertisement.extend(requestExtendAdvertisement.getExpiryDate());
-    }
 
     public void removeAdvertisement(@NonNull Long advertisementId) {
         Advertisement advertisement = getAdvertisementEntity(advertisementId);

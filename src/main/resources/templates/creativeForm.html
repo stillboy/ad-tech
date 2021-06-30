@@ -12,30 +12,29 @@
       <div><label>노출일자:</label> <input type="text" name="exposureDate" placeholder="yyyy-MM-ddTHH:mm:ss"/></div>
       <div><label>만료일자:</label> <input type="text" name="expiryDate" placeholder="yyyy-MM-ddTHH:mm:ss"/></div>
       <div><label>파일:</label> <input type="file" name="image"></div>
-      <div><button type="button">생성</button></div>
   </form>
+  <div><button type="button">생성</button></div>
 </body>
 
 <script type="text/javascript">
     $('button').click(() => {
-        let title = $('[name="title"]').val();
-        let winningBid = $('[name="winningBid"]').val();
-        let exposureDate = $('[name="exposureDate"]').val();
-        let expiryDate = $('[name="expiryDate"]').val();
-        let file = $('[name="image"]').val();
+        let formData = new FormData($('form')[0]);
 
-        $.post("/core/v1/creative/post", {
-            title: title,
-            winningBid: winningBid,
-            exposureDate: exposureDate,
-            expiryDate: expiryDate,
-            file: file
-        })
-        .done(()=>{
-            alert("성공!");
-        })
-        .fail((response)=>{
-            console.log(response.responseJSON);
+        $.ajax({
+            type: "POST",
+            enctype: 'multipart/form-data',
+            url: 'http://localhost:8000/core/v1/creative',
+            data: formData,
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: () => {
+                alert('광고를 생성했습니다!');
+            },
+            error: (response) => {
+                const errorResponse = response.responseJSON;
+                alert(errorResponse.message);
+            }
         });
     });
 </script>

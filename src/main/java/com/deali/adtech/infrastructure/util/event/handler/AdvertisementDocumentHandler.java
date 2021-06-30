@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-//TODO::부가 기능들과 관련된 로직은 aspect 로 도메인과 관련된 로직들은 도메인 이벤트로 처리
 @RequiredArgsConstructor
 @Component
 public class AdvertisementDocumentHandler {
