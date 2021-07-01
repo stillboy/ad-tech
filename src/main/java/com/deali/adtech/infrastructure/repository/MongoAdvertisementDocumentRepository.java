@@ -5,7 +5,11 @@ import com.deali.adtech.infrastructure.util.mapper.AdvertisementDocumentMapper;
 import com.deali.adtech.presentation.dto.ResponseCreative;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -15,8 +19,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
-public class MongoAdvertisementDocumentRepository
-        implements AdvertisementDocumentRepository {
+public class MongoAdvertisementDocumentRepository implements AdvertisementDocumentRepository {
     private final MongoTemplate mongoTemplate;
 
     @Value("${pool.bid-rate}")
@@ -43,6 +46,39 @@ public class MongoAdvertisementDocumentRepository
                         .collect(Collectors.toList());
 
         return responseCreativeList;
+    }
+
+    @Override
+    public void remove(AdvertisementDocument document) {
+        //TODO::문자열 그대로 들어가는 것도 마음에 안들어
+        Criteria criteria =
+                new Criteria("advertisementId").is(document.getAdvertisementId());
+
+        Query query = new Query();
+        query.addCriteria(criteria);
+
+        mongoTemplate.remove(query, AdvertisementDocument.class,"advertisement");
+    }
+
+    @Override
+    public void update(AdvertisementDocument document) {
+        Criteria criteria =
+                new Criteria("advertisementId").is(document.getAdvertisementId());
+
+        Query query = new Query();
+        query.addCriteria(criteria);
+
+        Update update = new Update();
+
+        update.set("title", document.getTitle());
+        update.set("winningBid", document.getWinningBid());
+        update.set("modifiedAt", document.getModifiedAt());
+        update.set("expiryDate", document.getExpiryDate());
+        update.set("imagePath", document.getImagePath());
+
+        FindAndModifyOptions options = new FindAndModifyOptions().upsert(false);
+
+        mongoTemplate.findAndModify(query, update, options, AdvertisementDocument.class);
     }
 
     private Double calculateScore(int bid, LocalDateTime time, Map<String, Number> map) {

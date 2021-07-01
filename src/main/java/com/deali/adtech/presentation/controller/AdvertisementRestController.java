@@ -55,6 +55,18 @@ public class AdvertisementRestController {
                 .body(response);
     }
 
+    @PutMapping("/{creativeId}")
+    public ResponseEntity editAdvertisement(@PathVariable("creativeId") Long advertisementId,
+            @ModelAttribute @Valid RequestEditAdvertisement request) {
+        request.setId(advertisementId);
+
+        advertisementService.editAdvertisement(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("완료!");
+    }
+
     @DeleteMapping("/{creativeId}")
     public ResponseEntity deleteAdvertisement(@PathVariable(name = "creativeId")
                                                           Long advertisementId) {

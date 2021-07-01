@@ -1,7 +1,10 @@
 package com.deali.adtech.infrastructure.util.event.handler;
 
 import com.deali.adtech.domain.Advertisement;
+import com.deali.adtech.domain.AdvertisementDocument;
+import com.deali.adtech.infrastructure.repository.AdvertisementDocumentRepository;
 import com.deali.adtech.infrastructure.util.event.AdvertisementRemovedEvent;
+import com.deali.adtech.infrastructure.util.mapper.AdvertisementDocumentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -13,17 +16,15 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 @Component
 public class AdvertisementDocumentEventHandler {
-    private final MongoTemplate mongoTemplate;
+    private final AdvertisementDocumentRepository repository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void removeAdvertisementDocument(AdvertisementRemovedEvent event) {
+    public void handleAdvertisementRemovedEvent(AdvertisementRemovedEvent event) {
+
         Advertisement advertisement = event.getAdvertisement();
+        AdvertisementDocument document = AdvertisementDocumentMapper.INSTANCE
+                .entityToDocument(advertisement);
 
-        Criteria criteria = new Criteria("advertisementId")
-                .is(advertisement.getId());
-
-        Query query = new Query(criteria);
-
-        mongoTemplate.remove(query, "advertisement");
+        repository.remove(document);
     }
 }

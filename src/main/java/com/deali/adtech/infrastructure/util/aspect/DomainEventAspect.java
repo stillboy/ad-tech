@@ -12,40 +12,39 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Order(0)
 @Component
-public class DomainEventAspect {
+public class DomainEventAspect implements ApplicationEventPublisherAware{
     private ApplicationEventPublisher applicationEventPublisher;
-    //private ThreadLocal<Boolean> appliedThreadLocal = new ThreadLocal<>();
+    private ThreadLocal<Boolean> appliedThreadLocal = new ThreadLocal<>();
 
-    @Around(value = "@annotation(org.springframework.transaction.annotation.Transactional)")
-    public Object handleEvent(ProceedingJoinPoint joinPoint) throws Throwable {
-        System.out.println(">>>>>>>>>>>>>>>>> ASPECT");
-        return joinPoint.proceed();
-//        Boolean appliedValue = appliedThreadLocal.get();
-//        boolean hasEventPublisher = false;
-//
-//        if(appliedValue != null && appliedValue) {
-//            hasEventPublisher = true;
-//        } else {
-//            hasEventPublisher = false;
-//            appliedThreadLocal.set(true);
-//        }
-//
-//        if(!hasEventPublisher) {
-//            Events.setPublisher(applicationEventPublisher);
-//        }
-//
-//        try {
-//            return joinPoint.proceed();
-//        } finally {
-//            if(!hasEventPublisher) {
-//                Events.reset();
-//                appliedThreadLocal.remove();
-//            }
-//        }
+    @Around("execution(* com.deali.adtech.application.AdvertisementService.*(..))")
+    public Object setUpEventPublisher(ProceedingJoinPoint joinPoint) throws Throwable {
+        Boolean appliedValue = appliedThreadLocal.get();
+        boolean hasEventPublisher = false;
+
+        if(appliedValue != null && appliedValue) {
+            hasEventPublisher = true;
+        } else {
+            hasEventPublisher = false;
+            appliedThreadLocal.set(true);
+        }
+
+        if(!hasEventPublisher) {
+
+            Events.setPublisher(applicationEventPublisher);
+        }
+
+        try {
+            return joinPoint.proceed();
+        } finally {
+            if(!hasEventPublisher) {
+                Events.reset();
+                appliedThreadLocal.remove();
+            }
+        }
     }
 
-    /*@Override
+    @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.applicationEventPublisher = applicationEventPublisher;
-    }*/
+    }
 }

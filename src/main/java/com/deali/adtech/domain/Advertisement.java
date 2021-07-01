@@ -1,15 +1,15 @@
 package com.deali.adtech.domain;
 
 import com.deali.adtech.infrastructure.exception.*;
+import com.deali.adtech.infrastructure.util.event.AdvertisementChangedEvent;
+import com.deali.adtech.infrastructure.util.event.AdvertisementPostponedEvent;
 import com.deali.adtech.infrastructure.util.event.AdvertisementRemovedEvent;
 import com.deali.adtech.infrastructure.util.event.Events;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +35,7 @@ public class Advertisement {
     @Column(name="MODIFIED_AT", nullable = false)
     private LocalDateTime modifiedAt;
 
+    //TODO:: 광고 노출 기간이라는 Value로 보고 클래스를 따로 정의, 광고 노출 관련 로직은 해당 클래스에서 다루는 걸로...
     @Column(name="EXPIRY_DATE", nullable = false)
     private LocalDateTime expiryDate;
 
@@ -88,6 +89,7 @@ public class Advertisement {
         this.modifiedAt = currentTime;
     }
 
+    //TODO:: 광고 노출 기간 관련해서는 꼭 value로 따로 분리해서 로직 처리 하기
     public void editAdvertisement(String title, Integer winningBid, LocalDateTime exposureDate,
                                   LocalDateTime expiryDate) {
 
@@ -99,13 +101,20 @@ public class Advertisement {
         changeWinningBid(winningBid);
         changeAdvertisingDuration(exposureDate, expiryDate);
         updateModifiedAt();
+
+        Events.raise(new AdvertisementChangedEvent(this));
     }
 
-    //TODO::spring fsm 으로 변경 가능할 듯
     protected void changeAdvertisingDuration(LocalDateTime exposureDate, LocalDateTime expiryDate) {
         //TODO::유효성 검증 따로 분리
         if(expiryDate == null || exposureDate == null || expiryDate.isBefore(exposureDate) ||
         exposureDate.isBefore(this.exposureDate)) {
+            throw new InvalidChangeDurationException();
+        }
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        if(expiryDate.isBefore(currentTime)) {
             throw new InvalidChangeDurationException();
         }
 
@@ -131,13 +140,17 @@ public class Advertisement {
 
         switch (status) {
             case WAITING:
+                this.exposureDate = newExposureDate;
+                break;
             case ADVERTISING:
+                this.exposureDate = newExposureDate;
                 status = AdvertisementStatus.WAITING;
-                //TODO::이벤트 발행해서 광고 풀에서 제거해야함
+                Events.raise(new AdvertisementPostponedEvent(this));
                 break;
             case EXPIRED:
             case DELETED:
             default:
+                //TODO:: 새로 추가되는 상태값들에 대한 런타임 익셉션 따로 정의
                 throw new InvalidExposureDateException();
         }
     }
@@ -172,7 +185,8 @@ public class Advertisement {
         switch (status) {
             case WAITING:
             case ADVERTISING:
-
+                this.expiryDate = newExpiryDate;
+                break;
             case EXPIRED:
             case DELETED:
             default:

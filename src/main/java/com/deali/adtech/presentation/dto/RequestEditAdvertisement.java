@@ -23,11 +23,11 @@ public class RequestEditAdvertisement {
     private Integer winningBid;
 
     @NotNull(message = "광고 시작일은 공백일 수 없습니다.")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime exposureDate;
 
     @NotNull(message = "광고 만료일은 공백일 수 없습니다.")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime expiryDate;
 
     private MultipartFile newImage;

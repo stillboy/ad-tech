@@ -1,47 +1,31 @@
 package com.deali.adtech.presentation.controller;
 
-import com.deali.adtech.RequestCreateAdvertisementDeserializer;
-import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
-import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.presentation.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -76,9 +60,9 @@ public class AdvertisementRestControllerTest {
                         .param("title", requestCreateAdvertisement.getTitle())
                         .param("winningBid", requestCreateAdvertisement.getWinningBid().toString())
                         .param("expiryDate",requestCreateAdvertisement.getExpiryDate()
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
                         .param("exposureDate",requestCreateAdvertisement.getExposureDate()
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))))
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
                 .andReturn()
                 .getResponse();
 
@@ -105,9 +89,9 @@ public class AdvertisementRestControllerTest {
                 .param("title", request.getTitle())
                 .param("winningBid", request.getWinningBid().toString())
                 .param("expiryDate",request.getExpiryDate()
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
                 .param("exposureDate",request.getExposureDate()
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))))
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
                 .andReturn()
                 .getResponse();
 
