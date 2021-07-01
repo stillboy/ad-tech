@@ -4,6 +4,7 @@ import com.deali.adtech.presentation.dto.ResponseCreative;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Component
+@Order(2)
 @Aspect
 public class RedisAspect {
     private final StringRedisTemplate redisTemplate;

@@ -28,8 +28,9 @@
             processData: false,
             contentType: false,
             cache: false,
-            success: () => {
+            success: (response) => {
                 alert('광고를 생성했습니다!');
+
             },
             error: (response) => {
                 const errorResponse = response.responseJSON;

@@ -1,5 +1,9 @@
 server:
   port: 8000
+  servlet:
+    encoding:
+      charset: utf-8
+      force: true
 
 spring:
   application:

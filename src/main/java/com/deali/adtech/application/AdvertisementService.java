@@ -89,7 +89,7 @@ public class AdvertisementService {
         Advertisement advertisement = getAdvertisementEntity(advertisementId);
         advertisement.remove();
         //TODO::분리할 수 있는 방법이 있나?
-        eventPublisher.publishEvent(new AdvertisementRemovedEvent(advertisement));
+        //eventPublisher.publishEvent(new AdvertisementRemovedEvent(advertisement));
     }
 
     private Advertisement getAdvertisementEntity(Long key) {

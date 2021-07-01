@@ -2,13 +2,17 @@ package com.deali.adtech.presentation.dto;
 
 import com.deali.adtech.domain.AdvertisementStatus;
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ResponseAdvertisement {
     private Long id;
     private String title;

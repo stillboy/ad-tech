@@ -4,6 +4,7 @@ import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.domain.AdvertisementImage;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.ResponseCreateAdvertisement;
+import com.deali.adtech.presentation.dto.ResponseDeleteAdvertisement;
 import com.deali.adtech.presentation.dto.ResponseMessage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -29,4 +30,7 @@ public interface AdvertisementMapper {
             @Mapping(source = "message.message", target = "message")
     })
     ResponseCreateAdvertisement toCreatedResponse(Long advertisementId, ResponseMessage message);
+
+    @Mapping(source = "message.message", target = "message")
+    ResponseDeleteAdvertisement toDeletedResponse(ResponseMessage message);
 }

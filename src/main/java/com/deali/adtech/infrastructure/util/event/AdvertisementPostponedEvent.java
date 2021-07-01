@@ -4,10 +4,10 @@ import com.deali.adtech.domain.Advertisement;
 import lombok.Getter;
 
 @Getter
-public class AdvertisementRemovedEvent extends DomainEvent{
+public class AdvertisementPostponedEvent extends DomainEvent{
     private final Advertisement advertisement;
 
-    public AdvertisementRemovedEvent(final Advertisement advertisement) {
+    public AdvertisementPostponedEvent(final Advertisement advertisement) {
         this.advertisement = advertisement;
     }
 }

@@ -7,6 +7,7 @@ import com.deali.adtech.presentation.dto.ResponseCreative;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Component
+@Order(1)
 @Aspect
 public class LoggingAspect {
     private final ExposedLogRepository exposedLogRepository;

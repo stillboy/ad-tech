@@ -1,6 +1,8 @@
 package com.deali.adtech.domain;
 
 import com.deali.adtech.infrastructure.exception.*;
+import com.deali.adtech.infrastructure.util.event.AdvertisementRemovedEvent;
+import com.deali.adtech.infrastructure.util.event.Events;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -130,9 +132,8 @@ public class Advertisement {
         switch (status) {
             case WAITING:
             case ADVERTISING:
-                //TODO::남은 기간을 계산하는게 필요한가 이러면?
-                //calculateRemainingTime(newExposureDate);
                 status = AdvertisementStatus.WAITING;
+                //TODO::이벤트 발행해서 광고 풀에서 제거해야함
                 break;
             case EXPIRED:
             case DELETED:
@@ -185,6 +186,7 @@ public class Advertisement {
         }
 
         status = AdvertisementStatus.DELETED;
+        Events.raise(new AdvertisementRemovedEvent(this));
     }
 
     protected Duration calculateRemainingTime(LocalDateTime newExposureDate) {

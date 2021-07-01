@@ -12,7 +12,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @RequiredArgsConstructor
 @Component
-public class AdvertisementDocumentHandler {
+public class AdvertisementDocumentEventHandler {
     private final MongoTemplate mongoTemplate;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
