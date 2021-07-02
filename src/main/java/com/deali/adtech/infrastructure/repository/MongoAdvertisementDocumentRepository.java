@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @Repository
 public class MongoAdvertisementDocumentRepository implements AdvertisementDocumentRepository {
     private final MongoTemplate mongoTemplate;
+    private final AdvertisementDocumentMapper documentMapper;
 
     @Value("${pool.bid-rate}")
     private Double bidRate;
@@ -39,7 +40,7 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
                     int bid = document.getWinningBid();
                     LocalDateTime time = document.getModifiedAt();
                     double score = calculateScore(bid, time, map);
-                    return AdvertisementDocumentMapper.INSTANCE.documentToDto(document, score);
+                    return documentMapper.documentToDto(document, score);
                 })
                         .sorted((d1,d2)->d2.getScore().compareTo(d1.getScore()))
                         .limit(10)

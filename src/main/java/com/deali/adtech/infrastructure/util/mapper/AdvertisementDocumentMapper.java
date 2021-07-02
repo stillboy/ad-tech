@@ -13,7 +13,7 @@ import java.util.List;
 
 import static com.deali.adtech.domain.AdvertisementDocument.*;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface AdvertisementDocumentMapper {
     AdvertisementDocumentMapper INSTANCE = Mappers.getMapper(AdvertisementDocumentMapper.class);
 

@@ -19,13 +19,14 @@ import java.util.List;
 @Aspect
 public class LoggingAspect {
     private final ExposedLogRepository exposedLogRepository;
+    private final ExposedLogMapper logMapper;
 
     @Transactional
     @AfterReturning(pointcut = "@annotation(com.deali.adtech.infrastructure.util.annotation.AdvertisementExposed)",
     returning = "exposedList")
     public void writeAdvertisementExposedLog(List<ResponseCreative> exposedList) {
         exposedList.forEach( advertisement -> {
-            ExposedLog log = ExposedLogMapper.INSTANCE.toLog(advertisement);
+            ExposedLog log = logMapper.toLog(advertisement);
             exposedLogRepository.save(log);
         });
     }

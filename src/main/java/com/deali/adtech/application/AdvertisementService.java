@@ -31,16 +31,9 @@ public class AdvertisementService {
     private String defaultPath;
 
     public Long createAdvertisement(@NonNull RequestCreateAdvertisement requestCreateAdvertisement) {
-
-//        Advertisement advertisement = AdvertisementMapper.INSTANCE
-//                                        .dtoToEntity(requestCreateAdvertisement);
-
         Advertisement advertisement = advertisementMapper.dtoToEntity(requestCreateAdvertisement);
 
         advertisement = advertisementRepository.save(advertisement);
-
-//        AdvertisementImage advertisementImage = AdvertisementMapper.INSTANCE
-//                .fileToEntity(requestCreateAdvertisement.getImage(), defaultPath);
 
         AdvertisementImage advertisementImage = advertisementMapper
                 .fileToEntity(requestCreateAdvertisement.getImage(), defaultPath);
@@ -84,7 +77,6 @@ public class AdvertisementService {
             }
         }
     }
-
 
     public void removeAdvertisement(@NonNull Long advertisementId) {
         Advertisement advertisement = getAdvertisementEntity(advertisementId);

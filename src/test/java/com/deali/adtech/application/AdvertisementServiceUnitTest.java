@@ -3,9 +3,11 @@ package com.deali.adtech.application;
 import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.domain.AdvertisementExposeCount;
 import com.deali.adtech.domain.AdvertisementImage;
+import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
+import com.deali.adtech.infrastructure.util.mapper.AdvertisementMapper;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,8 +17,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -33,6 +40,8 @@ public class AdvertisementServiceUnitTest {
     private AdvertisementImageRepository imageRepository;
     @Mock
     private AdvertisementExposeCountRepository exposeCountRepository;
+    @Mock
+    private AdvertisementMapper advertisementMapper;
 
     @InjectMocks
     private AdvertisementService advertisementService;
@@ -40,6 +49,7 @@ public class AdvertisementServiceUnitTest {
     private Advertisement advertisement;
     private AdvertisementImage image;
     private AdvertisementExposeCount exposeCount;
+    private static final String TEST_PATH = "/Users/admin/temp-image/";
 
     @BeforeEach
     public void setUp() {
@@ -77,14 +87,15 @@ public class AdvertisementServiceUnitTest {
         request.setWinningBid(advertisement.getWinningBid());
         request.setExposureDate(advertisement.getExposureDate());
         request.setExpiryDate(advertisement.getExpiryDate());
-        request.setImage(null);
+        request.setImage(mockMultipartFile("image","temp2.jpg"));
+
+        doNothing().when(image).uploadImageFile(any());
 
         given(advertisementRepository.save(any())).willReturn(advertisement);
         given(imageRepository.save(any())).willReturn(image);
         given(exposeCountRepository.save(any())).willReturn(exposeCount);
-
-        doNothing().when(image).bindAdvertisement(any());
-        doNothing().when(image).uploadImageFile(any());
+        given(advertisementMapper.dtoToEntity(any())).willReturn(advertisement);
+        given(advertisementMapper.fileToEntity(any(), any())).willReturn(image);
 
         /* when */
         Long id = advertisementService.createAdvertisement(request);
@@ -111,5 +122,34 @@ public class AdvertisementServiceUnitTest {
 
         /* then */
         verify(advertisementService, times(1)).editAdvertisement(any());
+    }
+
+    @Test
+    @DisplayName("소재 삭제 성공 테스트")
+    public void remove_advertisement_success_test() throws Exception {
+        /* given */
+        given(advertisementRepository.findById(any()))
+                .willReturn(Optional.of(advertisement));
+
+        /* when */
+        advertisementService.removeAdvertisement(advertisement.getId());
+
+        /* then */
+        assertThat(advertisement.getStatus())
+                .isEqualTo(AdvertisementStatus.DELETED);
+    }
+
+    private MockMultipartFile mockMultipartFile(String name, String originFileName) {
+        MockMultipartFile file = null;
+        File image = new File(TEST_PATH + originFileName);
+
+        try(FileInputStream fileInputStream =
+                    new FileInputStream(image)) {
+            file = new MockMultipartFile(name, originFileName, "multipart/form-data", fileInputStream);
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+        return file;
     }
 }

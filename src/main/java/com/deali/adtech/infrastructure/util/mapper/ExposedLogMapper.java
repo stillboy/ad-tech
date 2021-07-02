@@ -5,7 +5,7 @@ import com.deali.adtech.presentation.dto.ResponseCreative;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface ExposedLogMapper {
     ExposedLogMapper INSTANCE = Mappers.getMapper(ExposedLogMapper.class);
 
