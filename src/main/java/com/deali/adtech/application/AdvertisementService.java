@@ -5,15 +5,11 @@ import com.deali.adtech.infrastructure.exception.ImageUploadFailureException;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
-import com.deali.adtech.infrastructure.util.event.AdvertisementRemovedEvent;
 import com.deali.adtech.infrastructure.util.mapper.AdvertisementMapper;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
-import com.deali.adtech.presentation.dto.RequestExtendAdvertisement;
-import com.deali.adtech.presentation.dto.RequestPostPoneAdvertisement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +25,6 @@ public class AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementImageRepository imageRepository;
     private final AdvertisementExposeCountRepository advertisementExposeCountRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${image.advertisement.default-path}")
     private String defaultPath;
@@ -88,8 +83,6 @@ public class AdvertisementService {
     public void removeAdvertisement(@NonNull Long advertisementId) {
         Advertisement advertisement = getAdvertisementEntity(advertisementId);
         advertisement.remove();
-        //TODO::분리할 수 있는 방법이 있나?
-        //eventPublisher.publishEvent(new AdvertisementRemovedEvent(advertisement));
     }
 
     private Advertisement getAdvertisementEntity(Long key) {

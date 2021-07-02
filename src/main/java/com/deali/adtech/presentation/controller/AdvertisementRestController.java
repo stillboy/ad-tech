@@ -61,7 +61,7 @@ public class AdvertisementRestController {
 
         advertisementService.editAdvertisement(request);
 
-        //TODO::mapstruct로 변환하는게 좋을까 아니면 그냥 생성하는게 좋을까?
+        //TODO::map struct 로 변환하는게 좋을까 아니면 그냥 생성하는게 좋을까?
         ResponseEditAdvertisement response =
                 new ResponseEditAdvertisement(ResponseMessage.ADVERTISEMENT_EDITED.getMessage(),
                         advertisementId);

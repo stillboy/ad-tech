@@ -112,13 +112,13 @@ public class Advertisement {
             throw new InvalidChangeDurationException();
         }
 
+        if(exposureDate.equals(this.exposureDate) && expiryDate.equals(this.exposureDate)) return ;
+
         LocalDateTime currentTime = LocalDateTime.now();
 
         if(expiryDate.isBefore(currentTime)) {
             throw new InvalidChangeDurationException();
         }
-
-        if(exposureDate.equals(this.exposureDate) && expiryDate.equals(this.exposureDate)) return ;
 
         if(expiryDate.isAfter(this.expiryDate)) {
             extend(expiryDate);
