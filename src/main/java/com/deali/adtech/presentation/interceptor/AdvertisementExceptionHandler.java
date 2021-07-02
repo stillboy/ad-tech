@@ -1,10 +1,14 @@
 package com.deali.adtech.presentation.interceptor;
 
 import com.deali.adtech.infrastructure.exception.*;
+import com.deali.adtech.presentation.dto.ResponseEditAdvertisement;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hibernate.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -28,44 +32,36 @@ public class AdvertisementExceptionHandler {
     }
 
     @ExceptionHandler(InvalidExpiryDateException.class)
-    public ModelAndView handleExpiryDateException(InvalidExpiryDateException exception) {
-        ModelAndView modelAndView = createModelAndViewWithErrorCode(ErrorCode.INVALID_EXPIRY_DATE,
-                "home");
+    public ResponseEntity handleExpiryDateException(InvalidExpiryDateException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.INVALID_EXPIRY_DATE)
+                .build();
 
-        return modelAndView;
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
     @ExceptionHandler(ImageUploadFailureException.class)
-    public ModelAndView handleImageUploadException(ImageUploadFailureException exception) {
-        ModelAndView modelAndView = createModelAndViewWithErrorCode(ErrorCode.IMAGE_UPLOAD_FAIL,
-                "home");
+    public ResponseEntity handleImageUploadException(ImageUploadFailureException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.IMAGE_UPLOAD_FAIL)
+                .build();
 
-        return modelAndView;
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
     @ExceptionHandler(BindException.class)
-    public ModelAndView handleAdvertisementBindingException(BindException bindException) {
-        ModelAndView modelAndView = new ModelAndView();
+    public ResponseEntity handleArgumentValidException(BindException exception,
+                                                       BindingResult bindingResult) {
+        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_PARAMETERS,
+                exception.getFieldErrors());
 
-        modelAndView.setStatus(HttpStatus.BAD_REQUEST);
-
-        modelAndView.addObject("errors",
-                bindException.getBindingResult().getAllErrors());
-
-        modelAndView.setViewName("home");
-
-        return modelAndView;
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
-    private ModelAndView createModelAndViewWithErrorCode(ErrorCode errorCode,
-                                                         String viewName) {
-        ModelAndView modelAndView = new ModelAndView();
-
-        modelAndView.setStatus(HttpStatus.valueOf(errorCode.getStatus()));
-        modelAndView.addObject("errors",
-                Arrays.asList(errorCode));
-        modelAndView.setViewName(viewName);
-
-        return modelAndView;
-    }
 }

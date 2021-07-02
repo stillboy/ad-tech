@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
-@AutoConfigureMockMvc()
+@AutoConfigureMockMvc
 @AutoConfigureJsonTesters
 @SpringBootTest
 public class AdvertisementRestControllerTest {
@@ -40,6 +41,8 @@ public class AdvertisementRestControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private EntityManager entityManager;
 
     private MockHttpServletResponse createResponse;
     private RequestCreateAdvertisement requestCreateAdvertisement;
@@ -71,6 +74,9 @@ public class AdvertisementRestControllerTest {
                 ResponseCreateAdvertisement.class);
 
         targetId = responseCreateAdvertisement.getAdvertisementId();
+
+        entityManager.flush();
+        entityManager.clear();
     }
 
     @Test
@@ -104,6 +110,67 @@ public class AdvertisementRestControllerTest {
 
         assertThat(responseCreateAdvertisement.getMessage())
                 .isEqualTo(ResponseMessage.ADVERTISEMENT_CREATED.getMessage());
+    }
+
+    @Test
+    @DisplayName("editAdvertisement 성공 테스트 이미지가 없는 경우")
+    public void edit_advertisement_success_test() throws Exception {
+        RequestEditAdvertisement editRequest = mockRequestEditAdvertisement();
+
+        /* when */
+        MockHttpServletResponse response = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .multipart(DEFAULT_PATH+"/"+targetId.toString())
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .param("title", editRequest.getTitle())
+                        .param("winningBid", editRequest.getWinningBid().toString())
+                        .param("exposureDate", editRequest.getExposureDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
+                        .param("expiryDate", editRequest.getExpiryDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
+                .andReturn()
+                .getResponse();
+
+        /* then */
+        assertThat(response.getStatus())
+                .isEqualTo(HttpStatus.OK.value());
+    }
+
+    @Test
+    @DisplayName("editAdvertisement 성공 테스트 이미지가 있는 경우")
+    public void edit_advertisement_success_test_with_image() throws Exception {
+        /* given */
+        RequestEditAdvertisement editRequest = mockRequestEditAdvertisement();
+        MockMultipartFile file = mockMultipartFile("newImage", "temp2.jpg");
+
+        /* when */
+        MockHttpServletResponse response = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .multipart(DEFAULT_PATH+"/"+targetId.toString())
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .param("title", editRequest.getTitle())
+                        .param("winningBid", editRequest.getWinningBid().toString())
+                        .param("exposureDate", editRequest.getExposureDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
+                        .param("expiryDate", editRequest.getExpiryDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
+                .andReturn()
+                .getResponse();
+
+        /* then */
+        assertThat(response.getStatus())
+                .isEqualTo(HttpStatus.OK.value());
+
+
     }
 
     @Test
@@ -190,6 +257,20 @@ public class AdvertisementRestControllerTest {
         request.setExpiryDate(expiryDate);
         request.setTitle("테스트 광고");
         request.setWinningBid(10);
+
+        return request;
+    }
+
+    private RequestEditAdvertisement mockRequestEditAdvertisement() {
+        RequestEditAdvertisement request = new RequestEditAdvertisement();
+        LocalDateTime exposureDate = LocalDateTime.now(ZoneId.of("Asia/Seoul")).plusDays(30);
+        LocalDateTime expiryDate = LocalDateTime.from(exposureDate).plusDays(30);
+
+        request.setId(targetId);
+        request.setTitle("수정 타이틀");
+        request.setWinningBid(1);
+        request.setExposureDate(exposureDate);
+        request.setExpiryDate(expiryDate);
 
         return request;
     }

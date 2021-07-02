@@ -81,7 +81,8 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
         mongoTemplate.findAndModify(query, update, options, AdvertisementDocument.class);
     }
 
-    private Double calculateScore(int bid, LocalDateTime time, Map<String, Number> map) {
+    //TODO::딱 strategy 패턴인데?
+    private double calculateScore(int bid, LocalDateTime time, Map<String, Number> map) {
         Integer minBid = (Integer)map.get("minBid");
         Integer maxBid = (Integer)map.get("maxBid");
         Long minDate = (Long)map.get("minDate");
@@ -89,8 +90,17 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
 
         long convertedTime = time.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond()*1000;
 
-        return ((bid-minBid)/(double)(maxBid-minBid))*bidRate
-                + ((convertedTime-minDate)/(double)(maxDate-minDate))*dateRate;
+        double bidScore = 0, dateScore = 0;
+
+        if(maxBid-minBid != 0) {
+            bidScore = ((bid-minBid)/(double)(maxBid-minBid))*bidRate;
+        }
+
+        if(maxDate-minDate != 0) {
+            dateScore = ((convertedTime-minDate)/(double)(maxDate-minDate))*dateRate;
+        }
+
+        return bidScore+dateScore;
     }
 
     private Map<String, Number> getMinMaxWinningBidAndModifiedAt(List<AdvertisementDocument> advertisements) {

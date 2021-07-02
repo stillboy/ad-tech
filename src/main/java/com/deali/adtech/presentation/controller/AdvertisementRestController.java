@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@CrossOrigin("*")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/core/v1/creative")
@@ -62,9 +61,14 @@ public class AdvertisementRestController {
 
         advertisementService.editAdvertisement(request);
 
+        //TODO::mapstruct로 변환하는게 좋을까 아니면 그냥 생성하는게 좋을까?
+        ResponseEditAdvertisement response =
+                new ResponseEditAdvertisement(ResponseMessage.ADVERTISEMENT_EDITED.getMessage(),
+                        advertisementId);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body("완료!");
+                .body(response);
     }
 
     @DeleteMapping("/{creativeId}")
