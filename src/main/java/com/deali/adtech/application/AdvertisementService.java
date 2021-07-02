@@ -25,18 +25,24 @@ public class AdvertisementService {
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementImageRepository imageRepository;
     private final AdvertisementExposeCountRepository advertisementExposeCountRepository;
+    private final AdvertisementMapper advertisementMapper;
 
     @Value("${image.advertisement.default-path}")
     private String defaultPath;
 
     public Long createAdvertisement(@NonNull RequestCreateAdvertisement requestCreateAdvertisement) {
 
-        Advertisement advertisement = AdvertisementMapper.INSTANCE
-                                        .dtoToEntity(requestCreateAdvertisement);
+//        Advertisement advertisement = AdvertisementMapper.INSTANCE
+//                                        .dtoToEntity(requestCreateAdvertisement);
+
+        Advertisement advertisement = advertisementMapper.dtoToEntity(requestCreateAdvertisement);
 
         advertisement = advertisementRepository.save(advertisement);
 
-        AdvertisementImage advertisementImage = AdvertisementMapper.INSTANCE
+//        AdvertisementImage advertisementImage = AdvertisementMapper.INSTANCE
+//                .fileToEntity(requestCreateAdvertisement.getImage(), defaultPath);
+
+        AdvertisementImage advertisementImage = advertisementMapper
                 .fileToEntity(requestCreateAdvertisement.getImage(), defaultPath);
 
         advertisementImage.bindAdvertisement(advertisement);

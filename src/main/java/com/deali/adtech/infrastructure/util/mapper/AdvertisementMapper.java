@@ -12,7 +12,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 import org.springframework.web.multipart.MultipartFile;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface AdvertisementMapper {
     AdvertisementMapper INSTANCE = Mappers.getMapper(AdvertisementMapper.class);
 
