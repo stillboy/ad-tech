@@ -4,6 +4,7 @@ import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.domain.AdvertisementExposeCount;
 import com.deali.adtech.domain.AdvertisementImage;
 import com.deali.adtech.domain.AdvertisementStatus;
+import com.deali.adtech.infrastructure.exception.InvalidTitleException;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
@@ -23,7 +24,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -122,6 +122,39 @@ public class AdvertisementServiceUnitTest {
 
         /* then */
         verify(advertisementService, times(1)).editAdvertisement(any());
+    }
+
+    @Test
+    @DisplayName("소재 수정 실패 테스트 소재 제목이 2~255자 사이가 아닌 경우")
+    public void edit_advertisement_fail_test_invalid_title() throws Exception {
+        /* given */
+
+
+        /* when */
+
+
+        /* then */
+
+
+    }
+
+    @Test
+    @DisplayName("소재 수정 성공 테스트 교체할 이미지가 있는 경우")
+    public void edit_advertisement_success_test_with_image() throws Exception {
+        /* given */
+        RequestEditAdvertisement request = new RequestEditAdvertisement();
+        request.setId(advertisement.getId());
+        request.setTitle(advertisement.getTitle());
+        request.setWinningBid(1);
+        request.setExposureDate(advertisement.getExposureDate());
+        request.setExpiryDate(advertisement.getExpiryDate());
+        request.setNewImage(mockMultipartFile("newImage", "temp2.jpg"));
+
+        //TODO:: 이미지 업로드 로직 변경후에 다시 테스트
+
+        /* when */
+        advertisementService.editAdvertisement(request);
+        /* then */
     }
 
     @Test

@@ -8,8 +8,6 @@ import com.deali.adtech.infrastructure.exception.InvalidWinningBidException;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
-import com.deali.adtech.presentation.dto.RequestExtendAdvertisement;
-import com.deali.adtech.presentation.dto.RequestPostPoneAdvertisement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -209,67 +207,6 @@ class AdvertisementServiceTest {
         assertThat(result.getImages().get(0))
                 .hasFieldOrPropertyWithValue("extension", extension)
                 .hasFieldOrPropertyWithValue("size", mockMultipartFile.getSize());
-    }
-
-    //TODO::수정 필수
-    @Disabled
-    @Test
-    @DisplayName("소재 기간 연기 성공 테스트 케이스")
-    public void postpone_advertisement_success_test() {
-        /* given */
-        Advertisement target = advertisementRepository.findById(testAdvertisementId)
-                .orElseThrow(EntityNotFoundException::new);
-
-        RequestPostPoneAdvertisement request = new RequestPostPoneAdvertisement();
-        request.setAdvertisementId(target.getId());
-        request.setExposureDate(LocalDateTime.from(target.getExposureDate()).plusDays(30));
-
-        Duration originDuration = Duration.between(target.getExposureDate(), target.getExpiryDate());
-
-        /* when */
-        //advertisementServiceImpl.postponeAdvertisement(request);
-
-        entityManager.flush();
-        entityManager.clear();
-
-        target = advertisementRepository.findById(request.getAdvertisementId())
-                .orElseThrow(EntityNotFoundException::new);
-
-        /* then */
-        assertThat(target)
-                .hasFieldOrPropertyWithValue("exposureDate", request.getExposureDate());
-
-        assertThat(Duration.between(target.getExposureDate(), target.getExpiryDate()))
-                .isEqualTo(originDuration);
-    }
-
-    //TODO::수정필수
-    @Disabled
-    @Test
-    @DisplayName("소재 기간 연장 성공 테스트 케이스")
-    public void extend_advertisement_success_test()  {
-        /* given */
-        Advertisement target = advertisementRepository.findById(testAdvertisementId)
-                .orElseThrow(EntityNotFoundException::new);
-
-        LocalDateTime newExpiryDate = LocalDateTime.from(target.getExpiryDate()).plusDays(30);
-
-        RequestExtendAdvertisement request = new RequestExtendAdvertisement();
-        request.setAdvertisementId(target.getId());
-        request.setExpiryDate(newExpiryDate);
-
-        /* when */
-        //advertisementServiceImpl.extendAdvertisement(request);
-
-        entityManager.flush();
-        entityManager.clear();
-
-        target = advertisementRepository.findById(target.getId())
-                .orElseThrow(EntityNotFoundException::new);
-
-        /* then */
-        assertThat(target)
-                .hasFieldOrPropertyWithValue("expiryDate", newExpiryDate);
     }
 
     @Test

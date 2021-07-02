@@ -68,6 +68,7 @@ public class Advertisement {
         if(title == null || title.trim().length() == 0) {
             throw new InvalidTitleException();
         }
+
         this.title = title;
     }
 
