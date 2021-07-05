@@ -1,11 +1,11 @@
 package com.deali.adtech.application;
 
 import com.deali.adtech.domain.*;
-import com.deali.adtech.infrastructure.exception.ImageUploadFailureException;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
 import com.deali.adtech.infrastructure.util.mapper.AdvertisementMapper;
+import com.deali.adtech.infrastructure.util.support.FileUploadSupport;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +26,7 @@ public class AdvertisementService {
     private final AdvertisementImageRepository imageRepository;
     private final AdvertisementExposeCountRepository advertisementExposeCountRepository;
     private final AdvertisementMapper advertisementMapper;
+    private final FileUploadSupport fileUploadSupport;
 
     @Value("${image.advertisement.default-path}")
     private String defaultPath;
@@ -42,12 +43,10 @@ public class AdvertisementService {
 
         advertisementImage = imageRepository.save(advertisementImage);
 
-        try {
-            advertisementImage.uploadImageFile(requestCreateAdvertisement.getImage().getBytes());
-        } catch (Exception exception) {
-            throw new ImageUploadFailureException();
-        }
+       fileUploadSupport.uploadMultipartFileImage(requestCreateAdvertisement.getImage(),
+               advertisementImage.getFullPathName());
 
+       //TODO:: 여긴 왜 빌더에 그냥 넣고 advertisementImage 에는 바인드임?
         AdvertisementExposeCount advertisementExposeCount = AdvertisementExposeCount.builder()
                 .advertisement(advertisement)
                 .build();
@@ -67,14 +66,16 @@ public class AdvertisementService {
 
         MultipartFile newImage = requestEditAdvertisement.getNewImage();
 
-        //TODO::로직 변경 필요, 도메인 서비스로 따로 로직을 분리하면 좋을 것으로 생각
         if(newImage != null && !newImage.isEmpty()) {
             AdvertisementImage advertisementImage = getAdvertisementImageEntity(advertisement);
-            try {
-                advertisementImage.exchangeImage(newImage.getOriginalFilename(), newImage.getSize(), newImage.getBytes());
-            } catch (IOException exception) {
-                throw new RuntimeException();
-            }
+
+            String oldFilePath = advertisementImage.getFullPathName();
+            advertisementImage.editNameAndExtension(newImage.getOriginalFilename());
+
+            String newFilePath = advertisementImage.getFullPathName();
+            advertisementImage.changeSize(newImage.getSize());
+
+            fileUploadSupport.exchangeMultipartFileImage(newImage, oldFilePath, newFilePath);
         }
     }
 

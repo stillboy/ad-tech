@@ -182,6 +182,12 @@ class AdvertisementServiceTest {
 
         RequestEditAdvertisement request = buildRequestEditAdvertisement();
 
+        LocalDateTime newExposureDate = LocalDateTime.from(target.getExposureDate()).plusDays(30);
+        LocalDateTime newExpiryDate = LocalDateTime.from(newExposureDate).plusDays(30);
+
+        request.setExposureDate(newExposureDate);
+        request.setExpiryDate(newExpiryDate);
+
         String fileName = "editedImage.jpg";
         int lastDot = fileName.lastIndexOf(".");
         String extension = fileName.substring(lastDot+1, fileName.length());
