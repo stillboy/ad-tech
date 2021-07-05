@@ -83,14 +83,14 @@ public class Advertisement {
     public void updateModifiedAt() {
         LocalDateTime currentTime = LocalDateTime.now();
 
-        if(currentTime == null || currentTime.isBefore(this.modifiedAt)) {
+        if(currentTime.isBefore(this.modifiedAt)) {
             throw new InvalidModifiedTimeException();
         }
 
         this.modifiedAt = currentTime;
     }
 
-    //TODO:: 광고 노출 기간 관련해서는 꼭 value로 따로 분리해서 로직 처리 하기
+    //TODO:: 광고 노출 기간 관련해서는 꼭 value 로 따로 분리해서 로직 처리 하기
     public void editAdvertisement(String title, Integer winningBid, LocalDateTime exposureDate,
                                   LocalDateTime expiryDate) {
 

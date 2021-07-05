@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 @Transactional
 @RequiredArgsConstructor
@@ -89,6 +90,11 @@ public class AdvertisementService {
     }
 
     private AdvertisementImage getAdvertisementImageEntity(Advertisement advertisement) {
-        return advertisement.getImages().get(0);
+        List<AdvertisementImage> images =
+                imageRepository.findByAdvertisementId(advertisement.getId());
+
+        //TODO::익셉션 or 디폴트 이미지 처리?
+
+        return images.get(0);
     }
 }

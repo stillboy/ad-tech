@@ -4,13 +4,17 @@ import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.domain.AdvertisementExposeCount;
 import com.deali.adtech.domain.AdvertisementImage;
 import com.deali.adtech.domain.AdvertisementStatus;
+import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
+import com.deali.adtech.infrastructure.exception.InvalidChangeDurationException;
 import com.deali.adtech.infrastructure.exception.InvalidTitleException;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.infrastructure.util.mapper.AdvertisementMapper;
+import com.deali.adtech.infrastructure.util.support.FileUploadSupport;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
+import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -42,6 +47,8 @@ public class AdvertisementServiceUnitTest {
     private AdvertisementExposeCountRepository exposeCountRepository;
     @Mock
     private AdvertisementMapper advertisementMapper;
+    @Mock
+    private FileUploadSupport fileUploadSupport;
 
     @InjectMocks
     private AdvertisementService advertisementService;
@@ -89,13 +96,15 @@ public class AdvertisementServiceUnitTest {
         request.setExpiryDate(advertisement.getExpiryDate());
         request.setImage(mockMultipartFile("image","temp2.jpg"));
 
-        doNothing().when(image).uploadImageFile(any());
+
+        doNothing().when(fileUploadSupport).uploadMultipartFileImage(any(),any());
 
         given(advertisementRepository.save(any())).willReturn(advertisement);
         given(imageRepository.save(any())).willReturn(image);
         given(exposeCountRepository.save(any())).willReturn(exposeCount);
         given(advertisementMapper.dtoToEntity(any())).willReturn(advertisement);
         given(advertisementMapper.fileToEntity(any(), any())).willReturn(image);
+
 
         /* when */
         Long id = advertisementService.createAdvertisement(request);
@@ -108,12 +117,16 @@ public class AdvertisementServiceUnitTest {
     @DisplayName("소재 수정 성공 테스트 이미지가 없는 경우")
     public void edit_advertisement_success_test_no_image() throws Exception {
         /* given */
+        LocalDateTime newExposureDate = LocalDateTime.from(advertisement.getExposureDate())
+                .plusDays(30);
+        LocalDateTime newExpiryDate = LocalDateTime.from(newExposureDate).plusDays(30);
+
         RequestEditAdvertisement request = new RequestEditAdvertisement();
         request.setId(advertisement.getId());
-        request.setTitle(advertisement.getTitle());
+        request.setTitle("수정 제목");
         request.setWinningBid(1);
-        request.setExposureDate(advertisement.getExposureDate());
-        request.setExpiryDate(advertisement.getExpiryDate());
+        request.setExposureDate(newExposureDate);
+        request.setExpiryDate(newExpiryDate);
 
         given(advertisementRepository.findById(any())).willReturn(Optional.of(advertisement));
 
@@ -121,41 +134,166 @@ public class AdvertisementServiceUnitTest {
         advertisementService.editAdvertisement(request);
 
         /* then */
-        verify(advertisementService, times(1)).editAdvertisement(any());
-    }
-
-    @Test
-    @DisplayName("소재 수정 실패 테스트 소재 제목이 2~255자 사이가 아닌 경우")
-    public void edit_advertisement_fail_test_invalid_title() throws Exception {
-        /* given */
-
-
-        /* when */
-
-
-        /* then */
-
-
+        assertThat(advertisement)
+                .hasFieldOrPropertyWithValue("title", request.getTitle())
+                .hasFieldOrPropertyWithValue("winningBid", request.getWinningBid())
+                .hasFieldOrPropertyWithValue("exposureDate", request.getExposureDate())
+                .hasFieldOrPropertyWithValue("expiryDate", request.getExpiryDate())
+                .hasFieldOrPropertyWithValue("status", AdvertisementStatus.WAITING);
     }
 
     @Test
     @DisplayName("소재 수정 성공 테스트 교체할 이미지가 있는 경우")
     public void edit_advertisement_success_test_with_image() throws Exception {
         /* given */
+        LocalDateTime newExposureDate = LocalDateTime.from(advertisement.getExposureDate())
+                .plusDays(30);
+        LocalDateTime newExpiryDate = LocalDateTime.from(newExposureDate).plusDays(30);
+
         RequestEditAdvertisement request = new RequestEditAdvertisement();
         request.setId(advertisement.getId());
-        request.setTitle(advertisement.getTitle());
-        request.setWinningBid(1);
-        request.setExposureDate(advertisement.getExposureDate());
-        request.setExpiryDate(advertisement.getExpiryDate());
+        request.setTitle("수정된 제목");
+        request.setWinningBid(9);
+        request.setExposureDate(newExposureDate);
+        request.setExpiryDate(newExpiryDate);
         request.setNewImage(mockMultipartFile("newImage", "temp2.jpg"));
 
         //TODO:: 이미지 업로드 로직 변경후에 다시 테스트
+        doNothing().when(fileUploadSupport).exchangeMultipartFileImage(any(),any(),any());
+
+        given(advertisementRepository.findById(any()))
+                .willReturn(Optional.of(advertisement));
+        given(imageRepository.findByAdvertisementId(any()))
+                .willReturn(Arrays.asList(image));
 
         /* when */
         advertisementService.editAdvertisement(request);
+
+        /* then */
+
+        assertThat(advertisement)
+                .hasFieldOrPropertyWithValue("title", request.getTitle())
+                .hasFieldOrPropertyWithValue("winningBid", request.getWinningBid())
+                .hasFieldOrPropertyWithValue("exposureDate", request.getExposureDate())
+                .hasFieldOrPropertyWithValue("expiryDate", request.getExpiryDate());
+    }
+
+    @Test
+    @DisplayName("소재 수정 실패 테스트 소재가 삭제 상태인 경우")
+    public void edit_advertisement_fail_test_already_removed() throws Exception {
+        /* given */
+        LocalDateTime newExposureDate = LocalDateTime.from(advertisement.getExposureDate())
+                .plusDays(30);
+        LocalDateTime newExpiryDate = LocalDateTime.from(newExposureDate).plusDays(30);
+
+        RequestEditAdvertisement request = new RequestEditAdvertisement();
+        request.setId(advertisement.getId());
+        request.setTitle("수정된 제목");
+        request.setWinningBid(9);
+        request.setExposureDate(newExposureDate);
+        request.setExpiryDate(newExpiryDate);
+        request.setNewImage(mockMultipartFile("newImage", "temp2.jpg"));
+
+        advertisement.remove();
+
+        given(advertisementRepository.findById(any()))
+                .willReturn(Optional.of(advertisement));
+
+        /* when */
+
+        assertThatExceptionOfType(AlreadyRemovedAdvertisementException.class)
+                .isThrownBy(() -> {
+                    advertisementService.editAdvertisement(request);
+                });
+
         /* then */
     }
+
+   @Test
+   @DisplayName("소재 수정 실패 테스트 소재의 새로운 노출 만료 기간이 노출 시작 기간보다 이전인 경우")
+   public void edit_advertisement_fail_test_invalid_expiry_date() throws Exception {
+       /* given */
+       LocalDateTime newExposureDate = LocalDateTime.from(advertisement.getExposureDate())
+               .plusDays(30);
+       LocalDateTime newExpiryDate = LocalDateTime.from(newExposureDate).minusDays(30);
+
+       RequestEditAdvertisement request = new RequestEditAdvertisement();
+       request.setId(advertisement.getId());
+       request.setTitle("수정된 제목");
+       request.setWinningBid(9);
+       request.setExposureDate(newExposureDate);
+       request.setExpiryDate(newExpiryDate);
+       request.setNewImage(mockMultipartFile("newImage", "temp2.jpg"));
+
+       given(advertisementRepository.findById(any()))
+               .willReturn(Optional.of(advertisement));
+
+       /* when */
+       assertThatExceptionOfType(InvalidChangeDurationException.class)
+               .isThrownBy(()->{
+                  advertisementService.editAdvertisement(request);
+               });
+
+       /* then */
+
+   }
+
+   @Test
+   @DisplayName("소재 수정 실패 테스트 소재의 만료기간이 현재 시간보다 이전인 경우")
+   public void edit_advertisement_fail_test_expiry_date_is_before_current_time() throws Exception {
+       /* given */
+       LocalDateTime newExposureDate = LocalDateTime.from(advertisement.getExposureDate())
+               .plusDays(30);
+       LocalDateTime newExpiryDate = LocalDateTime.now().minusDays(30);
+
+       RequestEditAdvertisement request = new RequestEditAdvertisement();
+       request.setId(advertisement.getId());
+       request.setTitle("수정된 제목");
+       request.setWinningBid(9);
+       request.setExposureDate(newExposureDate);
+       request.setExpiryDate(newExpiryDate);
+       request.setNewImage(mockMultipartFile("newImage", "temp2.jpg"));
+
+       given(advertisementRepository.findById(any()))
+               .willReturn(Optional.of(advertisement));
+
+       /* when */
+       assertThatExceptionOfType(InvalidChangeDurationException.class)
+               .isThrownBy(()->{
+                   advertisementService.editAdvertisement(request);
+               });
+
+       /* then */
+   }
+
+   @Test
+   @DisplayName("소재 수정 실패 테스트 소재의 수정하려는 광고 시작 기간이 현재 광고 시작 기간보다 이전인 경우")
+   public void edit_advertisement_fail_test_invalid_exposure_date() throws Exception {
+       /* given */
+       LocalDateTime newExposureDate = LocalDateTime.from(advertisement.getExposureDate())
+               .minusDays(30);
+       LocalDateTime newExpiryDate = LocalDateTime.from(advertisement.getExpiryDate())
+               .plusDays(30);
+
+       RequestEditAdvertisement request = new RequestEditAdvertisement();
+       request.setId(advertisement.getId());
+       request.setTitle("수정된 제목");
+       request.setWinningBid(9);
+       request.setExposureDate(newExposureDate);
+       request.setExpiryDate(newExpiryDate);
+       request.setNewImage(mockMultipartFile("newImage", "temp2.jpg"));
+
+       given(advertisementRepository.findById(any()))
+               .willReturn(Optional.of(advertisement));
+
+       /* when */
+       assertThatExceptionOfType(InvalidChangeDurationException.class)
+               .isThrownBy(()->{
+                   advertisementService.editAdvertisement(request);
+               });
+
+       /* then */
+   }
 
     @Test
     @DisplayName("소재 삭제 성공 테스트")
