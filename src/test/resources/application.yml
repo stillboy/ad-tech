@@ -20,9 +20,11 @@ spring:
     show-sql: true
   h2:
 
+
+
 image:
   advertisement:
-    default-path: /Users/admin/IdeaProjects/ad-tech/src/main/resources/static/
+    default-path: /usr/locla/var/www
 
 pool:
   bid-rate: 0.6
