@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.persistence.EntityNotFoundException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -140,6 +141,31 @@ public class AdvertisementServiceUnitTest {
                 .hasFieldOrPropertyWithValue("exposureDate", request.getExposureDate())
                 .hasFieldOrPropertyWithValue("expiryDate", request.getExpiryDate())
                 .hasFieldOrPropertyWithValue("status", AdvertisementStatus.WAITING);
+    }
+
+    @Test
+    @DisplayName("소재 수정 성공 테스트 광고노출 기간이 감소한 경우")
+    public void edit_advertisement_success_test_reduce_advertising_duration() throws Exception {
+        /* given */
+        LocalDateTime newExposureDate = LocalDateTime.from(advertisement.getExposureDate());
+        LocalDateTime newExpiryDate = LocalDateTime.from(advertisement.getExpiryDate())
+                .minusDays(10);
+
+        RequestEditAdvertisement request = new RequestEditAdvertisement();
+        request.setId(advertisement.getId());
+        request.setTitle("수정 제목");
+        request.setWinningBid(1);
+        request.setExposureDate(newExposureDate);
+        request.setExpiryDate(newExpiryDate);
+
+        given(advertisementRepository.findById(any())).willReturn(Optional.of(advertisement));
+
+        /* when */
+        advertisementService.editAdvertisement(request);
+
+        /* then */
+        assertThat(advertisement)
+                .hasFieldOrPropertyWithValue("expiryDate", newExpiryDate);
     }
 
     @Test
@@ -308,6 +334,20 @@ public class AdvertisementServiceUnitTest {
         /* then */
         assertThat(advertisement.getStatus())
                 .isEqualTo(AdvertisementStatus.DELETED);
+    }
+
+    @Test
+    @DisplayName("소재 삭제 실패 테스트 식별자와 일치하는 소재가 존재하지 않는 경우")
+    public void remove_advertisement_fail_test() throws Exception {
+        /* given */
+        Long targetId = -1L;
+
+        /* when */
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(()->{
+            advertisementService.removeAdvertisement(targetId);
+        });
+
+        /* then */
     }
 
     private MockMultipartFile mockMultipartFile(String name, String originFileName) {

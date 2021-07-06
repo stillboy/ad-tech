@@ -9,8 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+
 import javax.persistence.*;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -204,17 +204,17 @@ public class Advertisement {
         Events.raise(new AdvertisementRemovedEvent(this));
     }
 
-    protected Duration calculateRemainingTime(LocalDateTime newExposureDate) {
-        if(newExposureDate == null) {
-            throw new InvalidExposureDateException();
-        }
-
-        Duration duration = Duration.between(exposureDate, expiryDate);
-        this.exposureDate = newExposureDate;
-        this.expiryDate = newExposureDate.plus(duration);
-
-        return duration;
-    }
+//    protected Duration calculateRemainingTime(LocalDateTime newExposureDate) {
+//        if(newExposureDate == null) {
+//            throw new InvalidExposureDateException();
+//        }
+//
+//        Duration duration = Duration.between(exposureDate, expiryDate);
+//        this.exposureDate = newExposureDate;
+//        this.expiryDate = newExposureDate.plus(duration);
+//
+//        return duration;
+//    }
 
     protected void initExposureDate(LocalDateTime exposureDate) {
         if(exposureDate == null || exposureDate.isBefore(this.createdAt)) {

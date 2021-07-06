@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.Arrays;
 
 @RestControllerAdvice
@@ -46,6 +47,28 @@ public class AdvertisementExceptionHandler {
     public ResponseEntity handleImageUploadException(ImageUploadFailureException exception) {
         ErrorResponse response = ErrorResponse.builder()
                 .errorCode(ErrorCode.IMAGE_UPLOAD_FAIL)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity handleEntityNotFoundException(EntityNotFoundException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.NO_SUCH_ADVERTISEMENT)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(response);
+    }
+
+    @ExceptionHandler(InvalidChangeDurationException.class)
+    public ResponseEntity handleInvalidChangeDurationException(InvalidChangeDurationException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.INVALID_ADVERTISING_DURATION)
                 .build();
 
         return ResponseEntity

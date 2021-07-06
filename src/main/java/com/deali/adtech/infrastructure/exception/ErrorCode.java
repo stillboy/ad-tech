@@ -8,7 +8,9 @@ public enum ErrorCode {
     INVALID_EXPOSURE_DATE(400, "A001", "시작 일자는 현재 시간 이전일 수 없습니다."),
     INVALID_EXPIRY_DATE(400, "A002", "만료 일자는 광고 시작 일자 혹은 현재 시간 이전일 수 없습니다."),
     IMAGE_UPLOAD_FAIL(500, "A003", "이미지 업로드에 실패했습니다."),
-    INVALID_PARAMETERS(400, "A004", "입력값이 잘못되었습니다. 다시 입력해주세요.")
+    INVALID_PARAMETERS(400, "A004", "입력값이 잘못되었습니다. 다시 입력해주세요."),
+    NO_SUCH_ADVERTISEMENT(404, "A005", "요청하신 광고가 존재하지 않습니다."),
+    INVALID_ADVERTISING_DURATION(400, "A006", "잘못된 형식의 광고 노출 기간입니다.")
     ;
 
     private final String code;

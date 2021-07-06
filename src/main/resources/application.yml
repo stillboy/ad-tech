@@ -22,6 +22,10 @@ spring:
       ddl-auto: validate
     show-sql: true
 
+  devtools:
+    livereload:
+      enabled: true
+
 image:
   advertisement:
     default-path: /Users/admin/IdeaProjects/ad-tech/src/main/resources/static/
