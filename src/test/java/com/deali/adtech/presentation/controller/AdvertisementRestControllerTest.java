@@ -348,6 +348,37 @@ public class AdvertisementRestControllerTest {
     }
 
     @Test
+    @DisplayName("editAdvertisement 실패 테스트 광고 노출 기간이 잘못된 경우")
+    public void edit_advertisement_fail_test_invalid_advertising_duration() throws Exception {
+        RequestEditAdvertisement editRequest = mockRequestEditAdvertisement();
+        editRequest.setExpiryDate(editRequest.getExposureDate());
+
+        /* when */
+        MockHttpServletResponse response = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .multipart(DEFAULT_PATH+"/"+targetId.toString())
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .param("title", editRequest.getTitle())
+                        .param("winningBid", editRequest.getWinningBid().toString())
+                        .param("exposureDate", editRequest.getExposureDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
+                        .param("expiryDate", editRequest.getExpiryDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
+                .andExpect(jsonPath("$..['message']")
+                        .value(ErrorCode.INVALID_ADVERTISING_DURATION.getDefaultMessage()))
+                .andReturn()
+                .getResponse();
+
+        /* then */
+        assertThat(response.getStatus())
+                .isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
     @DisplayName("deleteAdvertisement 성공 테스트")
     public void delete_advertisement_success_test() throws Exception {
         /* given */
@@ -369,6 +400,32 @@ public class AdvertisementRestControllerTest {
 
         assertThat(responseDeleteAdvertisement.getMessage())
                 .isEqualTo(ResponseMessage.ADVERTISEMENT_DELETE.getMessage());
+    }
+
+    @Test
+    @DisplayName("deleteAdvertisement 실패 테스트 이미 삭제된 광고일 경우")
+    public void delete_advertisement_fail_test_already_removed() throws Exception {
+        /* given */
+        Advertisement target = entityManager.find(Advertisement.class, targetId);
+        target.remove();
+
+        /* when */
+
+        MockHttpServletResponse advertisementDeletedResponse = mockMvc.perform(
+                MockMvcRequestBuilders.delete(DEFAULT_PATH+"/" +targetId))
+                .andReturn()
+                .getResponse();
+
+
+        ErrorResponse errorResponse
+                = objectMapper.readValue(advertisementDeletedResponse.getContentAsString(),
+                ErrorResponse.class);
+        /* then */
+        assertThat(advertisementDeletedResponse.getStatus())
+                .isEqualTo(HttpStatus.BAD_REQUEST.value());
+
+        assertThat(errorResponse.getMessage())
+                .isEqualTo(ErrorCode.ALREADY_REMOVED.getDefaultMessage());
     }
 
     @Test
@@ -403,6 +460,29 @@ public class AdvertisementRestControllerTest {
         assertThat(responseAdvertisement.getExposureDate().toString())
                 .isEqualTo(requestCreateAdvertisement.getExposureDate()
                         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
+    }
+
+    @Test
+    @DisplayName("getAdvertisement 실패 테스트 해당 소재가 존재하지 않는 경우")
+    public void get_advertisement_fail_test_entity_not_found() throws Exception {
+        /* given */
+
+        /* when */
+        MockHttpServletResponse getResponse = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .get(DEFAULT_PATH+"/" +500L))
+                .andReturn()
+                .getResponse();
+
+        ErrorResponse errorResponse
+                = objectMapper.readValue(getResponse.getContentAsString(),
+                ErrorResponse.class);
+
+        /* then */
+        assertThat(getResponse.getStatus())
+                .isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(errorResponse.getMessage())
+                .isEqualTo(ErrorCode.NO_SUCH_ADVERTISEMENT.getDefaultMessage());
     }
 
     @Test

@@ -107,7 +107,6 @@ public class Advertisement {
     }
 
     protected void changeAdvertisingDuration(LocalDateTime exposureDate, LocalDateTime expiryDate) {
-        //TODO::유효성 검증 따로 분리
         if(expiryDate == null || exposureDate == null || expiryDate.isBefore(exposureDate) ||
         exposureDate.isBefore(this.exposureDate) || expiryDate.equals(exposureDate)) {
             throw new InvalidChangeDurationException();
@@ -117,8 +116,9 @@ public class Advertisement {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
+        //TODO::만료시간이 현재 시간보다 이전이면 안되나?
         if(expiryDate.isBefore(currentTime)) {
-            throw new InvalidChangeDurationException();
+            throw new InvalidExpiryDateException();
         }
 
         if(expiryDate.isAfter(this.expiryDate)) {
@@ -191,7 +191,7 @@ public class Advertisement {
             case EXPIRED:
             case DELETED:
             default:
-                throw  new InvalidExpiryDateException();
+                throw new InvalidExpiryDateException();
         }
     }
 

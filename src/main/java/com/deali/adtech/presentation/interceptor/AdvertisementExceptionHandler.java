@@ -95,6 +95,8 @@ public class AdvertisementExceptionHandler {
         ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_PARAMETERS,
                 exception.getFieldErrors());
 
+        System.out.println("catch here");
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);

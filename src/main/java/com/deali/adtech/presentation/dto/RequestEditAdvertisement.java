@@ -22,9 +22,11 @@ public class RequestEditAdvertisement {
     @Range(min = 1, max = 10, message = "낙찰가는 1~10사이로 지정해주세요")
     private Integer winningBid;
 
+    @NotNull(message = "수정할 광고 시작 기간을 입력해주세요.")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime exposureDate;
 
+    @NotNull(message = "수정할 광고 만료 기간을 입력해주세요.")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime expiryDate;
 

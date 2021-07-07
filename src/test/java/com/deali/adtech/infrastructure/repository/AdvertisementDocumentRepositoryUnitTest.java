@@ -3,6 +3,7 @@ package com.deali.adtech.infrastructure.repository;
 import com.deali.adtech.domain.AdvertisementDocument;
 import com.deali.adtech.presentation.dto.ResponseCreative;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,11 @@ public class AdvertisementDocumentRepositoryUnitTest {
 
             mongoTemplate.save(document, "advertisement");
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        mongoTemplate.dropCollection("advertisement");
     }
 
     @Test
