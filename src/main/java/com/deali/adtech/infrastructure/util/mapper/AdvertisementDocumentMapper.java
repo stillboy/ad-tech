@@ -24,6 +24,7 @@ public interface AdvertisementDocumentMapper {
 
         if(advertisement != null ) {
             builder.advertisementId(advertisement.getId());
+            builder.title(advertisement.getTitle());
             builder.modifiedAt(advertisement.getModifiedAt());
             builder.expiryDate(advertisement.getExpiryDate());
             builder.winningBid(advertisement.getWinningBid());

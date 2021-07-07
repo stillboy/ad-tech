@@ -10,7 +10,8 @@ public enum ErrorCode {
     IMAGE_UPLOAD_FAIL(500, "A003", "이미지 업로드에 실패했습니다."),
     INVALID_PARAMETERS(400, "A004", "입력값이 잘못되었습니다. 다시 입력해주세요."),
     NO_SUCH_ADVERTISEMENT(404, "A005", "요청하신 광고가 존재하지 않습니다."),
-    INVALID_ADVERTISING_DURATION(400, "A006", "잘못된 형식의 광고 노출 기간입니다.")
+    INVALID_ADVERTISING_DURATION(400, "A006", "잘못된 형식의 광고 시작/만료 기간입니다."),
+    ALREADY_REMOVED(400, "A007", "이미 삭제 처리된 광고입니다.")
     ;
 
     private final String code;

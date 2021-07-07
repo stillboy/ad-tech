@@ -9,11 +9,6 @@ spring:
   application:
     name: adtech
 
-  data:
-    mongodb:
-      database: adtech
-      port: 27017
-      host: localhost
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -21,10 +16,9 @@ spring:
   h2:
 
 
-
 image:
   advertisement:
-    default-path: /usr/locla/var/www
+    default-path: /Users/admin/temp-image/
 
 pool:
   bid-rate: 0.6

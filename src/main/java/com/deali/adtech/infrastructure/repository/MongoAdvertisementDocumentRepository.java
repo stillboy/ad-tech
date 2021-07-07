@@ -1,6 +1,7 @@
 package com.deali.adtech.infrastructure.repository;
 
 import com.deali.adtech.domain.AdvertisementDocument;
+import com.deali.adtech.infrastructure.exception.EmptyPoolException;
 import com.deali.adtech.infrastructure.util.mapper.AdvertisementDocumentMapper;
 import com.deali.adtech.presentation.dto.ResponseCreative;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,10 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
     public List<ResponseCreative> searchTop10Advertisement() {
         List<AdvertisementDocument> results = mongoTemplate.findAll(AdvertisementDocument.class);
 
+        if(results == null || results.size()==0) {
+            throw new EmptyPoolException();
+        }
+
         Map<String, Number> map = getMinMaxWinningBidAndModifiedAt(results);
 
         List<ResponseCreative> responseCreativeList =
@@ -51,9 +56,8 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
 
     @Override
     public void remove(AdvertisementDocument document) {
-        //TODO::문자열 그대로 들어가는 것도 마음에 안들어
-        Criteria criteria =
-                new Criteria("advertisementId").is(document.getAdvertisementId());
+        Criteria criteria
+                = new Criteria("advertisementId").is(document.getAdvertisementId());
 
         Query query = new Query();
         query.addCriteria(criteria);
@@ -105,11 +109,6 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
     }
 
     private Map<String, Number> getMinMaxWinningBidAndModifiedAt(List<AdvertisementDocument> advertisements) {
-        //TODO::익셉션 정의 필요
-        if(advertisements == null || advertisements.size() == 0) {
-            throw new RuntimeException();
-        }
-
         Map<String, Number> resultMap = new HashMap<>();
 
         Integer minBid = Integer.MAX_VALUE, maxBid = Integer.MIN_VALUE;

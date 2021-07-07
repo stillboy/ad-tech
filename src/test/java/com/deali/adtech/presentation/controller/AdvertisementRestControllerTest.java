@@ -1,5 +1,7 @@
 package com.deali.adtech.presentation.controller;
 
+import com.deali.adtech.domain.Advertisement;
+import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.presentation.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -117,6 +120,44 @@ public class AdvertisementRestControllerTest {
     @DisplayName("editAdvertisement 성공 테스트 이미지가 없는 경우")
     public void edit_advertisement_success_test() throws Exception {
         RequestEditAdvertisement editRequest = mockRequestEditAdvertisement();
+
+        /* when */
+        MockHttpServletResponse response = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .multipart(DEFAULT_PATH+"/"+targetId.toString())
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .param("title", editRequest.getTitle())
+                        .param("winningBid", editRequest.getWinningBid().toString())
+                        .param("exposureDate", editRequest.getExposureDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
+                        .param("expiryDate", editRequest.getExpiryDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
+                .andReturn()
+                .getResponse();
+
+        /* then */
+        assertThat(response.getStatus())
+                .isEqualTo(HttpStatus.OK.value());
+    }
+
+    @Test
+    @DisplayName("editAdvertisement 성공 테스트 광고 노출 기간을 연기하는 경우")
+    public void edit_advertisement_success_test_postpone_advertisement() throws Exception {
+        /* given */
+        RequestEditAdvertisement editRequest = mockRequestEditAdvertisement();
+        Advertisement target = entityManager.find(Advertisement.class, targetId);
+
+        ReflectionTestUtils.setField(target, "status", AdvertisementStatus.ADVERTISING);
+
+        LocalDateTime newExposureDate = LocalDateTime.now().plusDays(30);
+        LocalDateTime newExpiryDate = LocalDateTime.from(newExposureDate).plusDays(30);
+
+        editRequest.setExposureDate(newExposureDate);
+        editRequest.setExpiryDate(newExpiryDate);
 
         /* when */
         MockHttpServletResponse response = mockMvc.perform(

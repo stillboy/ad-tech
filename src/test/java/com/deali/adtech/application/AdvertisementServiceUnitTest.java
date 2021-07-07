@@ -169,6 +169,42 @@ public class AdvertisementServiceUnitTest {
     }
 
     @Test
+    @DisplayName("소재 수정 성공 테스트 광고노출 기간이 연기된 경우")
+    public void edit_advertisement_success_test_postpone_advertising_duration() throws Exception {
+        /* given */
+
+        LocalDateTime past = LocalDateTime.now().minusDays(30);
+        LocalDateTime exposureDate = LocalDateTime.now().minusDays(10);
+        LocalDateTime expiryDate = LocalDateTime.now().plusDays(30);
+
+        ReflectionTestUtils.setField(advertisement, "createdAt", past);
+        ReflectionTestUtils.setField(advertisement, "modifiedAt", past);
+        ReflectionTestUtils.setField(advertisement, "exposureDate", exposureDate);
+        ReflectionTestUtils.setField(advertisement, "expiryDate", expiryDate);
+        ReflectionTestUtils.setField(advertisement, "status", AdvertisementStatus.ADVERTISING);
+
+        LocalDateTime newExposureDate = LocalDateTime.from(exposureDate).plusDays(5);
+        LocalDateTime newExpiryDate = LocalDateTime.from(expiryDate);
+
+        RequestEditAdvertisement request = new RequestEditAdvertisement();
+        request.setId(advertisement.getId());
+        request.setTitle("수정 제목");
+        request.setWinningBid(1);
+        request.setExposureDate(newExposureDate);
+        request.setExpiryDate(newExpiryDate);
+
+        given(advertisementRepository.findById(any())).willReturn(Optional.of(advertisement));
+
+        /* when */
+        advertisementService.editAdvertisement(request);
+
+        /* then */
+        assertThat(advertisement)
+                .hasFieldOrPropertyWithValue("status", AdvertisementStatus.WAITING);
+
+    }
+
+    @Test
     @DisplayName("소재 수정 성공 테스트 교체할 이미지가 있는 경우")
     public void edit_advertisement_success_test_with_image() throws Exception {
         /* given */

@@ -78,37 +78,4 @@ public class AdvertisementImage {
         this.name = UUID.randomUUID().toString();
         this.extension = fileName.substring(lastDot+1, fileName.length());
     }
-
-    //TODO::이미지 업로드 로직 도메인 서비스로 분리?
-    public void uploadImageFile(byte[] fileBytes) {
-        if(path == null || fileBytes.length <= 0) return;
-
-        try(FileOutputStream fileOutputStream =
-                    new FileOutputStream(path+name+"."+extension)) {
-            fileOutputStream.write(fileBytes);
-        } catch(IOException exception) {
-            throw new ImageUploadFailureException();
-        }
-    }
-
-    public void exchangeImage(String fileName, Long newSize, byte[] newFileBytes) {
-        if(!removeImageFile()) {
-            throw new ImageUploadFailureException();
-        }
-
-        editNameAndExtension(fileName);
-        changeSize(newSize);
-
-        uploadImageFile(newFileBytes);
-    }
-
-    protected boolean removeImageFile() {
-        File file = new File(getFullPathName());
-
-        if(!file.exists()) {
-            throw new ImageUploadFailureException();
-        }
-
-        return file.delete();
-    }
 }

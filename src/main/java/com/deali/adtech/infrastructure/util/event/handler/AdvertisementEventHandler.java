@@ -17,13 +17,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 public class AdvertisementEventHandler {
     private final AdvertisementDocumentRepository repository;
+    private final AdvertisementDocumentMapper documentMapper;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAdvertisementPostponedEvent(AdvertisementPostponedEvent event) {
         Advertisement target = event.getAdvertisement();
 
-        AdvertisementDocument document = AdvertisementDocumentMapper.INSTANCE
-                .entityToDocument(target);
+        AdvertisementDocument document = documentMapper.entityToDocument(target);
 
         repository.remove(document);
     }
@@ -34,8 +34,7 @@ public class AdvertisementEventHandler {
 
         if(target.getStatus() != AdvertisementStatus.ADVERTISING) return ;
 
-        AdvertisementDocument document = AdvertisementDocumentMapper.INSTANCE
-                .entityToDocument(target);
+        AdvertisementDocument document = documentMapper.entityToDocument(target);
 
         repository.update(document);
     }

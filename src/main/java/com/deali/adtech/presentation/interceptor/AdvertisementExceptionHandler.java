@@ -21,6 +21,17 @@ import java.util.Arrays;
 @RestControllerAdvice
 public class AdvertisementExceptionHandler {
 
+    @ExceptionHandler(AlreadyRemovedAdvertisementException.class)
+    public ResponseEntity handleAlreadyRemovedException(AlreadyRemovedAdvertisementException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.ALREADY_REMOVED)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
     @ExceptionHandler(InvalidExposureDateException.class)
     public ResponseEntity handleExposureDateException(InvalidExposureDateException exception) {
         ErrorResponse response = ErrorResponse.builder()
