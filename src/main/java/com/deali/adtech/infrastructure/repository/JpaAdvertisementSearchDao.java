@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +44,6 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
         return new PageImpl<ResponseAdvertisement>(result.getResults(), pageable, result.getTotal());
     }
 
-    //TODO:: 레디스 db 연동 작업, 일단 10분 마다
     @Override
     public ResponseAdvertisement findAdvertisementById(Long advertisementId) {
         ResponseAdvertisement responseAdvertisement = queryFactory
@@ -56,6 +56,10 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
                 .on(advertisement.id.eq(advertisementExposeCount.advertisement.id))
                 .where(advertisement.id.eq(advertisementId))
                 .fetchOne();
+
+        if(responseAdvertisement == null) {
+            throw new EntityNotFoundException();
+        }
 
         List<AdvertisementImage> images = advertisementImageRepository.findByAdvertisementId(advertisementId);
         List<String> imagePathList = new ArrayList<>();

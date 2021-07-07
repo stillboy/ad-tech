@@ -5,6 +5,7 @@ import com.deali.adtech.domain.AdvertisementDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,10 +34,14 @@ public class AdvertisementPoolRestControllerTest {
     private static final String DEFAULT_PATH = "/dsp/v1/creative";
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(TestInfo testInfo) {
         this.mockMvc = MockMvcBuilders
                 .standaloneSetup(new AdvertisementPoolRestController(advertisementPoolService))
                 .build();
+
+        if(testInfo.getDisplayName().equals("상위 10개 소재 노출 실패 테스트 소재 풀에 소재가 하나도 없는 경우")) {
+            return ;
+        }
 
         LocalDateTime expiryDate = LocalDateTime.now().plusDays(30);
 
@@ -57,6 +62,18 @@ public class AdvertisementPoolRestControllerTest {
     @Test
     @DisplayName("상위 10개 소재 노출 성공 테스트")
     public void get_top_10_advertisement_success_test() throws Exception {
+        /* given */
+
+        /* when */
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(DEFAULT_PATH))
+                .andExpect(status().isOk());
+        /* then */
+    }
+
+    @Test
+    @DisplayName("상위 10개 소재 노출 실패 테스트 소재 풀에 소재가 하나도 없는 경우")
+    public void get_top_10_advertisement_fail_test_empty_pool() throws Exception {
         /* given */
 
         /* when */

@@ -30,6 +30,11 @@ spring:
     livereload:
       enabled: true
 
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+
 image:
   advertisement:
     default-path: /usr/local/var/www/

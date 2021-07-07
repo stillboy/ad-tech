@@ -9,4 +9,5 @@ public interface FileUploadSupport {
     void exchangeImage(byte[] fileBytes, String oldFilePath, String newFilePath);
     void exchangeMultipartFileImage(MultipartFile multipartFile, String oldFilePath, String newFilePath);
     boolean removeImage(String filePath);
+    boolean multipartFileValidation(MultipartFile multipartFile);
 }

@@ -2,6 +2,8 @@ package com.deali.adtech.presentation.controller;
 
 import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.domain.AdvertisementStatus;
+import com.deali.adtech.infrastructure.exception.ErrorCode;
+import com.deali.adtech.infrastructure.exception.ErrorResponse;
 import com.deali.adtech.presentation.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,6 +116,136 @@ public class AdvertisementRestControllerTest {
 
         assertThat(responseCreateAdvertisement.getMessage())
                 .isEqualTo(ResponseMessage.ADVERTISEMENT_CREATED.getMessage());
+    }
+
+    @Test
+    @DisplayName("createAdvertisement 실패 테스트 이미지 형식이 올바르지 않은 경우")
+    public void create_advertisement_fail_test_invalid_image_type() throws Exception {
+        /* given */
+        RequestCreateAdvertisement request = mockRequestCreateAdvertisement();
+        MockMultipartFile file = mockMultipartFile("image", "wrong.image");
+
+        /* when */
+        MockHttpServletResponse response = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .multipart(DEFAULT_PATH)
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .param("title", request.getTitle())
+                        .param("winningBid", request.getWinningBid().toString())
+                        .param("expiryDate",request.getExpiryDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
+                        .param("exposureDate",request.getExposureDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
+                .andReturn()
+                .getResponse();
+
+        ErrorResponse errorResponse
+                = objectMapper.readValue(response.getContentAsString(),
+                ErrorResponse.class);
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(errorResponse)
+                .hasFieldOrPropertyWithValue("message", ErrorCode.INVALID_FILE_TYPE.getDefaultMessage());
+    }
+
+    @Test
+    @DisplayName("createAdvertisement 실패 테스트 광고 노출 시작 기간이 현재 시간보다 이전인 경우")
+    public void create_advertisement_fail_test_invalid_exposure_date() throws Exception {
+        /* given */
+        LocalDateTime pastTime = LocalDateTime.now().minusDays(10);
+
+        RequestCreateAdvertisement request = mockRequestCreateAdvertisement();
+        request.setExposureDate(pastTime);
+        MockMultipartFile file = mockMultipartFile("image", "temp2.jpg");
+
+        /* when */
+        MockHttpServletResponse response = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .multipart(DEFAULT_PATH)
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .param("title", request.getTitle())
+                        .param("winningBid", request.getWinningBid().toString())
+                        .param("expiryDate",request.getExpiryDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
+                        .param("exposureDate",request.getExposureDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
+                .andReturn()
+                .getResponse();
+
+        ErrorResponse errorResponse
+                = objectMapper.readValue(response.getContentAsString(),
+                ErrorResponse.class);
+
+        /* then */
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(errorResponse.getMessage())
+                .isEqualTo(ErrorCode.INVALID_EXPOSURE_DATE.getDefaultMessage());
+    }
+
+    @Test
+    @DisplayName("createAdvertisement 실패 테스트 광고 만료 기간이 광고 노출 시간 이전인 경우")
+    public void create_advertisement_fail_test_invalid_expiry_date() throws Exception {
+        /* given */
+        RequestCreateAdvertisement request = mockRequestCreateAdvertisement();
+        request.setExposureDate(request.getExpiryDate());
+        MockMultipartFile file = mockMultipartFile("image", "temp2.jpg");
+
+        /* when */
+        MockHttpServletResponse response = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .multipart(DEFAULT_PATH)
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .param("title", request.getTitle())
+                        .param("winningBid", request.getWinningBid().toString())
+                        .param("expiryDate",request.getExpiryDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
+                        .param("exposureDate",request.getExposureDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
+                .andReturn()
+                .getResponse();
+
+        ErrorResponse errorResponse
+                = objectMapper.readValue(response.getContentAsString(),
+                ErrorResponse.class);
+
+        /* then */
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(errorResponse.getMessage())
+                .isEqualTo(ErrorCode.INVALID_EXPIRY_DATE.getDefaultMessage());
+    }
+
+    @Test
+    @DisplayName("createAdvertisement 실패 테스트 입력값에 허용되지 않은 값들이 들어온 경우")
+    public void create_advertisement_fail_test_invalid_input_data() throws Exception {
+        /* given */
+        RequestCreateAdvertisement request = mockRequestCreateAdvertisement();
+        request.setTitle("제");
+        request.setWinningBid(15);
+
+        MockMultipartFile file = mockMultipartFile("image", "temp2.jpg");
+
+        /* when */
+        MockHttpServletResponse response = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .multipart(DEFAULT_PATH)
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .param("title", request.getTitle())
+                        .param("winningBid", request.getWinningBid().toString())
+                        .param("expiryDate",request.getExpiryDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")))
+                        .param("exposureDate",request.getExposureDate()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
+                .andExpect(jsonPath("$..['message']")
+                        .value(ErrorCode.INVALID_PARAMETERS.getDefaultMessage()))
+                .andReturn()
+                .getResponse();
+
+        /* then */
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test

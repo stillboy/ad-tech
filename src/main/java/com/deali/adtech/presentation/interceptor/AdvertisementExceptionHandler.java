@@ -3,6 +3,7 @@ package com.deali.adtech.presentation.interceptor;
 import com.deali.adtech.infrastructure.exception.*;
 import com.deali.adtech.presentation.dto.ResponseEditAdvertisement;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.hibernate.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.persistence.EntityNotFoundException;
@@ -98,4 +100,25 @@ public class AdvertisementExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity handleSizeLimitException(MaxUploadSizeExceededException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.FILE_SIZE_EXCEED)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(InvalidImageTypeException.class)
+    public ResponseEntity handleInvalidImageTypeException(InvalidImageTypeException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.INVALID_FILE_TYPE)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
 }

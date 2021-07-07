@@ -34,7 +34,7 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
         List<AdvertisementDocument> results = mongoTemplate.findAll(AdvertisementDocument.class);
 
         if(results == null || results.size()==0) {
-            throw new EmptyPoolException();
+           return new ArrayList<ResponseCreative>();
         }
 
         Map<String, Number> map = getMinMaxWinningBidAndModifiedAt(results);

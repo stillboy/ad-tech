@@ -109,7 +109,7 @@ public class Advertisement {
     protected void changeAdvertisingDuration(LocalDateTime exposureDate, LocalDateTime expiryDate) {
         //TODO::유효성 검증 따로 분리
         if(expiryDate == null || exposureDate == null || expiryDate.isBefore(exposureDate) ||
-        exposureDate.isBefore(this.exposureDate)) {
+        exposureDate.isBefore(this.exposureDate) || expiryDate.equals(exposureDate)) {
             throw new InvalidChangeDurationException();
         }
 
@@ -213,7 +213,8 @@ public class Advertisement {
     }
 
     protected void initExpiryDate(LocalDateTime expiryDate) {
-        if(expiryDate == null || expiryDate.isBefore(this.createdAt)) {
+        if(expiryDate == null || expiryDate.isBefore(this.createdAt)
+                || expiryDate.equals(exposureDate)) {
             throw new InvalidExpiryDateException();
         }
 

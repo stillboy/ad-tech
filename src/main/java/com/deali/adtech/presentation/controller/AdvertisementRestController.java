@@ -42,7 +42,6 @@ public class AdvertisementRestController {
 
     @PostMapping
     public ResponseEntity createAdvertisement(@ModelAttribute @Valid RequestCreateAdvertisement request) {
-
         Long advertisementId = advertisementService.createAdvertisement(request);
 
         ResponseCreateAdvertisement response =

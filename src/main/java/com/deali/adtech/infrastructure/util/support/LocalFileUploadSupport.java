@@ -1,6 +1,7 @@
 package com.deali.adtech.infrastructure.util.support;
 
 import com.deali.adtech.infrastructure.exception.ImageUploadFailureException;
+import com.deali.adtech.infrastructure.exception.InvalidImageTypeException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +29,10 @@ public class LocalFileUploadSupport implements FileUploadSupport{
 
     @Override
     public void uploadMultipartFileImage(MultipartFile multipartFile, String filePath) {
+        if(!multipartFileValidation(multipartFile)) {
+            throw new InvalidImageTypeException();
+        }
+
         try {
 
             byte[] fileBytes = multipartFile.getBytes();
@@ -51,6 +56,10 @@ public class LocalFileUploadSupport implements FileUploadSupport{
 
     @Override
     public void exchangeMultipartFileImage(MultipartFile multipartFile, String oldFilePath, String newFilePath) {
+        if(!multipartFileValidation(multipartFile)) {
+            throw new InvalidImageTypeException();
+        }
+
         try {
             byte[] fileBytes = multipartFile.getBytes();
             exchangeImage(fileBytes, oldFilePath, newFilePath);
@@ -68,5 +77,34 @@ public class LocalFileUploadSupport implements FileUploadSupport{
         }
 
         return file.delete();
+    }
+
+    @Override
+    public boolean multipartFileValidation(MultipartFile multipartFile) {
+        if(multipartFile == null || multipartFile.isEmpty()) {
+            return false;
+        }
+
+        String contentType = multipartFile.getContentType();
+
+        if(contentType != null) {
+            String type = contentType.split("/")[0];
+            String extension = contentType.split("/")[1];
+
+            for(AllowedExtension extensionType : AllowedExtension.values()) {
+                if(extensionType.getExtension().equals(extension)) return true;
+            }
+        }
+
+        String originalFileName = multipartFile.getOriginalFilename();
+        int lastDotIndex = originalFileName.lastIndexOf(".");
+
+        String extension = originalFileName.substring(lastDotIndex+1);
+
+        for(AllowedExtension extensionType : AllowedExtension.values()) {
+            if(extensionType.getExtension().equals(extension)) return true;
+        }
+
+        return false;
     }
 }

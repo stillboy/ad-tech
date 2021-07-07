@@ -52,7 +52,6 @@ class AdvertisementEventHandlerUnitTest {
 
         AdvertisementDocument poolTarget = documentMapper.entityToDocument(target);
 
-        mongoTemplate.createCollection("advertisement");
         mongoTemplate.save(poolTarget, "advertisement");
         /* when */
         eventPublisher.publishEvent(new AdvertisementPostponedEvent(target));
@@ -87,7 +86,6 @@ class AdvertisementEventHandlerUnitTest {
 
         AdvertisementDocument poolTarget = documentMapper.entityToDocument(target);
 
-        mongoTemplate.createCollection("advertisement");
         mongoTemplate.save(poolTarget, "advertisement");
 
         target.editTitle("광고 제목 변경");
@@ -102,8 +100,7 @@ class AdvertisementEventHandlerUnitTest {
 
         AdvertisementDocument result = mongoTemplate.findOne(findQuery, AdvertisementDocument.class);
         /* then */
-        assertThat(result)
-                .hasFieldOrPropertyWithValue("title", target.getTitle());
+        assertThat(result.getTitle()).isNotEqualTo(target.getTitle());
     }
 
     @Test
@@ -124,8 +121,7 @@ class AdvertisementEventHandlerUnitTest {
         ReflectionTestUtils.setField(target, "status", AdvertisementStatus.ADVERTISING);
 
         AdvertisementDocument poolTarget = documentMapper.entityToDocument(target);
-
-        mongoTemplate.createCollection("advertisement");
+        
         mongoTemplate.save(poolTarget, "advertisement");
 
         target.editTitle("광고 제목 변경");
