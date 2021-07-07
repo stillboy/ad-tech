@@ -70,7 +70,7 @@ public class AdvertisementService {
             AdvertisementImage advertisementImage = getAdvertisementImageEntity(advertisement);
 
             String oldFilePath = advertisementImage.getFullPathName();
-            advertisementImage.editNameAndExtension(newImage.getOriginalFilename());
+            advertisementImage.changeLocation(newImage.getOriginalFilename(), defaultPath);
 
             String newFilePath = advertisementImage.getFullPathName();
             advertisementImage.changeSize(newImage.getSize());

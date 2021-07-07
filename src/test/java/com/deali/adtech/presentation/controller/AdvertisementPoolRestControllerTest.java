@@ -72,7 +72,7 @@ public class AdvertisementPoolRestControllerTest {
     }
 
     @Test
-    @DisplayName("상위 10개 소재 노출 실패 테스트 소재 풀에 소재가 하나도 없는 경우")
+    @DisplayName("상위 10개 소재 노출 실패 테스트 소재 풀이 비어있는 없는 경우")
     public void get_top_10_advertisement_fail_test_empty_pool() throws Exception {
         /* given */
 

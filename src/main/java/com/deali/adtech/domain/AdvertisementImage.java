@@ -56,6 +56,11 @@ public class AdvertisementImage {
         splitNameAndExtension(fileName);
     }
 
+    public void changeLocation(String fileName, String path) {
+        this.path = path;
+        editNameAndExtension(fileName);
+    }
+
     public void changeSize(Long size) {
         if(size == null || size <= 0) return;
         this.size = size;
