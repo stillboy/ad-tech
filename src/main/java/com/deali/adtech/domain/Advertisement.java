@@ -107,10 +107,16 @@ public class Advertisement {
     }
 
     protected void changeAdvertisingDuration(LocalDateTime exposureDate, LocalDateTime expiryDate) {
-        if(expiryDate == null || exposureDate == null || expiryDate.isBefore(exposureDate) ||
-        exposureDate.isBefore(this.exposureDate) || expiryDate.equals(exposureDate)) {
+        if(expiryDate == null
+                || exposureDate == null
+                || expiryDate.isBefore(exposureDate)
+                || exposureDate.isBefore(this.exposureDate)
+                || expiryDate.equals(exposureDate)) {
             throw new InvalidChangeDurationException();
         }
+
+        //TODO:: 현재 시간보다 이후 이고 현재 광고 노출 시작시간보다는 이전인 새로운 광고 노출 시간에 대한 변경이 제대로
+        // 이루어지지 않음
 
         if(exposureDate.equals(this.exposureDate) && expiryDate.equals(this.exposureDate)) return ;
 
