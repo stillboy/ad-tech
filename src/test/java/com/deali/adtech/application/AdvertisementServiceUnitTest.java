@@ -4,9 +4,7 @@ import com.deali.adtech.domain.Advertisement;
 import com.deali.adtech.domain.AdvertisementExposeCount;
 import com.deali.adtech.domain.AdvertisementImage;
 import com.deali.adtech.domain.AdvertisementStatus;
-import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
-import com.deali.adtech.infrastructure.exception.InvalidChangeDurationException;
-import com.deali.adtech.infrastructure.exception.InvalidTitleException;
+import com.deali.adtech.infrastructure.exception.*;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
@@ -183,7 +181,7 @@ public class AdvertisementServiceUnitTest {
         ReflectionTestUtils.setField(advertisement, "expiryDate", expiryDate);
         ReflectionTestUtils.setField(advertisement, "status", AdvertisementStatus.ADVERTISING);
 
-        LocalDateTime newExposureDate = LocalDateTime.from(exposureDate).plusDays(5);
+        LocalDateTime newExposureDate = LocalDateTime.now().plusDays(5);
         LocalDateTime newExpiryDate = LocalDateTime.from(expiryDate);
 
         RequestEditAdvertisement request = new RequestEditAdvertisement();
@@ -291,7 +289,7 @@ public class AdvertisementServiceUnitTest {
                .willReturn(Optional.of(advertisement));
 
        /* when */
-       assertThatExceptionOfType(InvalidChangeDurationException.class)
+       assertThatExceptionOfType(InvalidExpiryDateException.class)
                .isThrownBy(()->{
                   advertisementService.editAdvertisement(request);
                });
@@ -320,7 +318,7 @@ public class AdvertisementServiceUnitTest {
                .willReturn(Optional.of(advertisement));
 
        /* when */
-       assertThatExceptionOfType(InvalidChangeDurationException.class)
+       assertThatExceptionOfType(InvalidExpiryDateException.class)
                .isThrownBy(()->{
                    advertisementService.editAdvertisement(request);
                });
@@ -349,7 +347,7 @@ public class AdvertisementServiceUnitTest {
                .willReturn(Optional.of(advertisement));
 
        /* when */
-       assertThatExceptionOfType(InvalidChangeDurationException.class)
+       assertThatExceptionOfType(InvalidExposureDateException.class)
                .isThrownBy(()->{
                    advertisementService.editAdvertisement(request);
                });

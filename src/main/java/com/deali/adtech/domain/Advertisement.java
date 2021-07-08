@@ -62,6 +62,7 @@ public class Advertisement {
         initExposureDate(exposureDate);
         initExpiryDate(expiryDate);
         this.status = AdvertisementStatus.WAITING;
+
     }
 
     public void editTitle(String title) {
@@ -100,105 +101,19 @@ public class Advertisement {
 
         editTitle(title);
         changeWinningBid(winningBid);
-        changeAdvertisingDuration(exposureDate, expiryDate);
+        changeDuration(exposureDate, expiryDate);
+        //changeAdvertisingDuration(exposureDate, expiryDate);
         updateModifiedAt();
 
         Events.raise(new AdvertisementChangedEvent(this));
     }
 
-    protected void changeAdvertisingDuration(LocalDateTime exposureDate, LocalDateTime expiryDate) {
-        if(expiryDate == null
-                || exposureDate == null
-                || expiryDate.isBefore(exposureDate)
-                || exposureDate.isBefore(this.exposureDate)
-                || expiryDate.equals(exposureDate)) {
-            throw new InvalidChangeDurationException();
-        }
-
-        //TODO:: 현재 시간보다 이후 이고 현재 광고 노출 시작시간보다는 이전인 새로운 광고 노출 시간에 대한 변경이 제대로
-        // 이루어지지 않음
-
-        if(exposureDate.equals(this.exposureDate) && expiryDate.equals(this.exposureDate)) return ;
-
-        LocalDateTime currentTime = LocalDateTime.now();
-
-        //TODO::만료시간이 현재 시간보다 이전이면 안되나?
-        if(expiryDate.isBefore(currentTime)) {
-            throw new InvalidExpiryDateException();
-        }
-
-        if(expiryDate.isAfter(this.expiryDate)) {
-            extend(expiryDate);
-        }
-
-        if(exposureDate.isAfter(this.exposureDate)) {
-            postpone(exposureDate);
-        }
-
-        if(expiryDate.isBefore(this.expiryDate)) {
-            reduce(expiryDate);
-        }
+    public void postpone() {
+        this.status = AdvertisementStatus.WAITING;
     }
 
-    protected void postpone(LocalDateTime newExposureDate) {
-        if(newExposureDate == null || newExposureDate.isBefore(exposureDate)) {
-            throw new InvalidExposureDateException();
-        }
-
-        switch (status) {
-            case WAITING:
-                this.exposureDate = newExposureDate;
-                break;
-            case ADVERTISING:
-                this.exposureDate = newExposureDate;
-                status = AdvertisementStatus.WAITING;
-                Events.raise(new AdvertisementPostponedEvent(this));
-                break;
-            case EXPIRED:
-            case DELETED:
-            default:
-                //TODO:: 새로 추가되는 상태값들에 대한 런타임 익셉션 따로 정의
-                throw new InvalidExposureDateException();
-        }
-    }
-
-    protected void extend(LocalDateTime newExpiryDate) {
-        if(newExpiryDate == null
-                || newExpiryDate.isBefore(exposureDate)
-                || newExpiryDate.isBefore(expiryDate)) {
-            throw new InvalidExpiryDateException();
-        }
-
-        switch (status) {
-            case WAITING:
-            case ADVERTISING:
-                this.expiryDate = newExpiryDate;
-                break;
-            case EXPIRED:
-                this.expiryDate = newExpiryDate;
-                this.status = AdvertisementStatus.WAITING;
-                break;
-            case DELETED:
-            default:
-                throw new InvalidExpiryDateException();
-        }
-    }
-
-    protected void reduce(LocalDateTime newExpiryDate) {
-        if(newExpiryDate == null || newExpiryDate.isAfter(this.expiryDate)) {
-            throw new InvalidExpiryDateException();
-        }
-
-        switch (status) {
-            case WAITING:
-            case ADVERTISING:
-                this.expiryDate = newExpiryDate;
-                break;
-            case EXPIRED:
-            case DELETED:
-            default:
-                throw new InvalidExpiryDateException();
-        }
+    public void updateExpiredDuration() {
+        this.status = AdvertisementStatus.WAITING;
     }
 
     public void remove() {
@@ -228,6 +143,31 @@ public class Advertisement {
             throw new InvalidExpiryDateException();
         }
 
+        this.expiryDate = expiryDate;
+    }
+
+    public void changeDuration(LocalDateTime exposureDate, LocalDateTime expiryDate) {
+        if(this.exposureDate.equals(exposureDate) && this.expiryDate.equals(expiryDate)) return;
+
+        StatusStrategy strategy = null;
+
+        switch (status) {
+            case WAITING: strategy = new WaitingStatusStrategy(); break;
+            case ADVERTISING: strategy = new AdvertisingStatusStrategy(); break;
+            case EXPIRED: strategy = new ExpiredStatusStrategy(); break;
+            case DELETED: strategy = new DeletedStatusStrategy(); break;
+            default:
+                throw new RuntimeException();
+        }
+
+        strategy.changeDuration(this, exposureDate, expiryDate);
+    }
+
+    public void changeExposureDate(LocalDateTime exposureDate) {
+        this.exposureDate = exposureDate;
+    }
+
+    public void changeExpiryDate(LocalDateTime expiryDate) {
         this.expiryDate = expiryDate;
     }
 }

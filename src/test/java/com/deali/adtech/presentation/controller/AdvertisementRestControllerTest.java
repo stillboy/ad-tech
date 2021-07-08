@@ -369,7 +369,7 @@ public class AdvertisementRestControllerTest {
                         .param("expiryDate", editRequest.getExpiryDate()
                                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))))
                 .andExpect(jsonPath("$..['message']")
-                        .value(ErrorCode.INVALID_ADVERTISING_DURATION.getDefaultMessage()))
+                        .value(ErrorCode.INVALID_EXPIRY_DATE.getDefaultMessage()))
                 .andReturn()
                 .getResponse();
 
