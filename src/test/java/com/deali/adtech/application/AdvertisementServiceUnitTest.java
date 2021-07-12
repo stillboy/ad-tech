@@ -218,7 +218,6 @@ public class AdvertisementServiceUnitTest {
         request.setExpiryDate(newExpiryDate);
         request.setNewImage(mockMultipartFile("newImage", "temp2.jpg"));
 
-        //TODO:: 이미지 업로드 로직 변경후에 다시 테스트
         doNothing().when(fileUploadSupport).exchangeMultipartFileImage(any(),any(),any());
 
         given(advertisementRepository.findById(any()))

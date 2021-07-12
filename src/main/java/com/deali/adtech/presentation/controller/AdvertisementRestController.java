@@ -19,6 +19,7 @@ import javax.validation.Valid;
 public class AdvertisementRestController {
     private final AdvertisementService advertisementService;
     private final JpaAdvertisementSearchDao advertisementSearchDao;
+    private final AdvertisementMapper advertisementMapper;
 
     @GetMapping("/{creativeId}")
     public ResponseEntity getAdvertisement(@PathVariable("creativeId") Long advertisementId) {
@@ -44,9 +45,8 @@ public class AdvertisementRestController {
     public ResponseEntity createAdvertisement(@ModelAttribute @Valid RequestCreateAdvertisement request) {
         Long advertisementId = advertisementService.createAdvertisement(request);
 
-        ResponseCreateAdvertisement response =
-                AdvertisementMapper.INSTANCE.toCreatedResponse(advertisementId,
-                        ResponseMessage.ADVERTISEMENT_CREATED);
+        ResponseCreateAdvertisement response
+                = advertisementMapper.toCreatedResponse(advertisementId, ResponseMessage.ADVERTISEMENT_CREATED);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -60,7 +60,6 @@ public class AdvertisementRestController {
 
         advertisementService.editAdvertisement(request);
 
-        //TODO::map struct 로 변환하는게 좋을까 아니면 그냥 생성하는게 좋을까?
         ResponseEditAdvertisement response =
                 new ResponseEditAdvertisement(ResponseMessage.ADVERTISEMENT_EDITED.getMessage(),
                         advertisementId);
@@ -75,9 +74,8 @@ public class AdvertisementRestController {
                                                           Long advertisementId) {
         advertisementService.removeAdvertisement(advertisementId);
 
-        ResponseDeleteAdvertisement response =
-                AdvertisementMapper.INSTANCE.toDeletedResponse(
-                        ResponseMessage.ADVERTISEMENT_DELETE);
+        ResponseDeleteAdvertisement response
+                = advertisementMapper.toDeletedResponse(ResponseMessage.ADVERTISEMENT_DELETE);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

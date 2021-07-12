@@ -46,7 +46,6 @@ public class AdvertisementService {
        fileUploadSupport.uploadMultipartFileImage(requestCreateAdvertisement.getImage(),
                advertisementImage.getFullPathName());
 
-       //TODO:: 여긴 왜 빌더에 그냥 넣고 advertisementImage 에는 바인드임?
         AdvertisementExposeCount advertisementExposeCount = AdvertisementExposeCount.builder()
                 .advertisement(advertisement)
                 .build();
@@ -91,8 +90,6 @@ public class AdvertisementService {
     private AdvertisementImage getAdvertisementImageEntity(Advertisement advertisement) {
         List<AdvertisementImage> images =
                 imageRepository.findByAdvertisementId(advertisement.getId());
-
-        //TODO::익셉션 or 디폴트 이미지 처리?
 
         return images.get(0);
     }

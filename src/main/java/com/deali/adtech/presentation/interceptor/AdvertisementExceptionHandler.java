@@ -1,16 +1,29 @@
 package com.deali.adtech.presentation.interceptor;
 
 import com.deali.adtech.infrastructure.exception.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
 @RestControllerAdvice
 public class AdvertisementExceptionHandler {
+    private final MessageSource messageSource;
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity handleETCException(RuntimeException exception) {
@@ -26,8 +39,30 @@ public class AdvertisementExceptionHandler {
     @ExceptionHandler(BindException.class)
     public ResponseEntity handleArgumentValidException(BindException exception,
                                                        BindingResult bindingResult) {
-        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_PARAMETERS,
-                exception.getFieldErrors());
+
+        List<ErrorResponse.CustomFieldError> fieldErrors = new ArrayList<>();
+
+        for(FieldError error : bindingResult.getFieldErrors()) {
+            String customMessage = Arrays.stream(Objects.requireNonNull(error.getCodes()))
+                    .map(code -> {
+                        try{
+                            return messageSource.getMessage(
+                                    code,
+                                    error.getArguments(),
+                                    LocaleContextHolder.getLocale()
+                            );
+                        } catch (NoSuchMessageException noSuchMessageException) {
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(error.getDefaultMessage());
+            fieldErrors.add(ErrorResponse.CustomFieldError.of(error,customMessage));
+        }
+
+        ErrorResponse response
+                = ErrorResponse.ofCustomFields(ErrorCode.INVALID_PARAMETERS, fieldErrors);
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)

@@ -2,7 +2,6 @@ package com.deali.adtech.domain;
 
 import com.deali.adtech.infrastructure.exception.*;
 import com.deali.adtech.infrastructure.util.event.AdvertisementChangedEvent;
-import com.deali.adtech.infrastructure.util.event.AdvertisementPostponedEvent;
 import com.deali.adtech.infrastructure.util.event.AdvertisementRemovedEvent;
 import com.deali.adtech.infrastructure.util.event.Events;
 import lombok.Builder;
@@ -35,7 +34,6 @@ public class Advertisement {
     @Column(name="MODIFIED_AT", nullable = false)
     private LocalDateTime modifiedAt;
 
-    //TODO:: 광고 노출 기간이라는 Value로 보고 클래스를 따로 정의, 광고 노출 관련 로직은 해당 클래스에서 다루는 걸로...
     @Column(name="EXPIRY_DATE", nullable = false)
     private LocalDateTime expiryDate;
 
@@ -90,7 +88,6 @@ public class Advertisement {
         this.modifiedAt = currentTime;
     }
 
-    //TODO:: 광고 노출 기간 관련해서는 꼭 value 로 따로 분리해서 로직 처리 하기
     public void editAdvertisement(String title, Integer winningBid, LocalDateTime exposureDate,
                                   LocalDateTime expiryDate) {
 

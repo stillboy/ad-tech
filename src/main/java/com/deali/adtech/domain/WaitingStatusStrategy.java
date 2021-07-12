@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 public class WaitingStatusStrategy implements StatusStrategy{
     @Override
     public void changeDuration(Advertisement advertisement, LocalDateTime exposureDate, LocalDateTime expiryDate) {
-        //TODO::상태값이 일치하지 않을 경우 익셉션 정의
         if(advertisement.getStatus() != AdvertisementStatus.WAITING) {
             throw new StatusMismatchException();
         }
