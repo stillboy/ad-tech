@@ -1,11 +1,14 @@
 package com.deali.adtech.infrastructure.repository;
 
 import com.deali.adtech.domain.AdvertisementImage;
+import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.domain.QAdvertisementExposeCount;
+import com.deali.adtech.infrastructure.exception.EntityNotFoundException;
 import com.deali.adtech.presentation.dto.AdvertisementSearchCondition;
 import com.deali.adtech.presentation.dto.QResponseAdvertisement;
 import com.deali.adtech.presentation.dto.ResponseAdvertisement;
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +18,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,4 +74,5 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
 
         return responseAdvertisement;
     }
+
 }

@@ -29,7 +29,6 @@ public class DomainEventAspect implements ApplicationEventPublisherAware{
         }
 
         if(!hasEventPublisher) {
-
             Events.setPublisher(applicationEventPublisher);
         }
 

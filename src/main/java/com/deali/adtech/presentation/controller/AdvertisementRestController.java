@@ -31,9 +31,9 @@ public class AdvertisementRestController {
     }
 
     @GetMapping
-    public ResponseEntity getAdvertisementList(Pageable pageable) {
+    public ResponseEntity getAdvertisementList(Pageable pageable, AdvertisementSearchCondition searchCondition) {
         Page<ResponseAdvertisement> results =
-                advertisementSearchDao.searchAdvertisement(pageable, null);
+                advertisementSearchDao.searchAdvertisement(pageable, searchCondition);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

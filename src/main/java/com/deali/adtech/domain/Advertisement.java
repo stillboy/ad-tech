@@ -62,7 +62,6 @@ public class Advertisement {
         initExposureDate(exposureDate);
         initExpiryDate(expiryDate);
         this.status = AdvertisementStatus.WAITING;
-
     }
 
     public void editTitle(String title) {
@@ -102,7 +101,6 @@ public class Advertisement {
         editTitle(title);
         changeWinningBid(winningBid);
         changeDuration(exposureDate, expiryDate);
-        //changeAdvertisingDuration(exposureDate, expiryDate);
         updateModifiedAt();
 
         Events.raise(new AdvertisementChangedEvent(this));

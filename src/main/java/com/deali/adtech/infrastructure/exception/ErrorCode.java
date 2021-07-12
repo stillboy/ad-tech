@@ -13,7 +13,9 @@ public enum ErrorCode {
     INVALID_ADVERTISING_DURATION(400, "A006", "잘못된 형식의 광고 시작/만료 기간입니다."),
     ALREADY_REMOVED(400, "A007", "이미 삭제 처리된 광고입니다."),
     FILE_SIZE_EXCEED(400, "A008", "파일 용량은 최대 30MB 입니다."),
-    INVALID_FILE_TYPE(400, "A009", "이미지 확장자는 jpg, jpeg, png, gif 만 허용됩니다.")
+    INVALID_FILE_TYPE(400, "A009", "이미지 확장자는 jpg, jpeg, png, gif 만 허용됩니다."),
+    STATUS_MISMATCH(500, "A010", "광고의 현재 상태와 맞지 않는 요청입니다."),
+    ETC(500, "A011", "서버 내부 오류 입니다.")
     ;
 
     private final String code;

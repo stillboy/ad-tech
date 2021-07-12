@@ -1,28 +1,38 @@
 package com.deali.adtech.presentation.interceptor;
 
 import com.deali.adtech.infrastructure.exception.*;
-import com.deali.adtech.presentation.dto.ResponseEditAdvertisement;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
-import org.hibernate.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.persistence.EntityNotFoundException;
-import java.time.format.DateTimeParseException;
-import java.util.Arrays;
 
 @RestControllerAdvice
 public class AdvertisementExceptionHandler {
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity handleETCException(RuntimeException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.ETC)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity handleArgumentValidException(BindException exception,
+                                                       BindingResult bindingResult) {
+        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_PARAMETERS,
+                exception.getFieldErrors());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
 
     @ExceptionHandler(AlreadyRemovedAdvertisementException.class)
     public ResponseEntity handleAlreadyRemovedException(AlreadyRemovedAdvertisementException exception) {
@@ -90,17 +100,6 @@ public class AdvertisementExceptionHandler {
                 .body(response);
     }
 
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity handleArgumentValidException(BindException exception,
-                                                       BindingResult bindingResult) {
-        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_PARAMETERS,
-                exception.getFieldErrors());
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
-    }
-
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity handleSizeLimitException(MaxUploadSizeExceededException exception) {
         ErrorResponse response = ErrorResponse.builder()
@@ -120,6 +119,17 @@ public class AdvertisementExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(StatusMismatchException.class)
+    public ResponseEntity handleStatusMismatchException(StatusMismatchException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.STATUS_MISMATCH)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(response);
     }
 }

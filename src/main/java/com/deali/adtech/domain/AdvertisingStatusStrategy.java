@@ -2,6 +2,7 @@ package com.deali.adtech.domain;
 
 import com.deali.adtech.infrastructure.exception.InvalidExpiryDateException;
 import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
+import com.deali.adtech.infrastructure.exception.StatusMismatchException;
 import com.deali.adtech.infrastructure.util.event.AdvertisementPostponedEvent;
 import com.deali.adtech.infrastructure.util.event.Events;
 
@@ -11,14 +12,14 @@ public class AdvertisingStatusStrategy implements StatusStrategy {
     @Override
     public void changeDuration(Advertisement advertisement, LocalDateTime exposureDate, LocalDateTime expiryDate) {
         if(advertisement.getStatus() != AdvertisementStatus.ADVERTISING) {
-            throw new RuntimeException();
+            throw new StatusMismatchException();
         }
-
-        validateExposureDate(advertisement, exposureDate);
-        validateExpiryDate(advertisement, expiryDate, exposureDate);
 
         LocalDateTime current = LocalDateTime.now();
         LocalDateTime originExposureDate = advertisement.getExposureDate();
+
+        validateExposureDate(advertisement, exposureDate);
+        validateExpiryDate(advertisement, expiryDate, exposureDate);
 
         advertisement.changeExposureDate(exposureDate);
         advertisement.changeExpiryDate(expiryDate);
@@ -33,6 +34,8 @@ public class AdvertisingStatusStrategy implements StatusStrategy {
     public void validateExposureDate(Advertisement advertisement, LocalDateTime exposureDate) {
         LocalDateTime current = LocalDateTime.now();
         LocalDateTime originExposureDate = advertisement.getExposureDate();
+
+        if(exposureDate != null && exposureDate.isEqual(originExposureDate)) return;
 
         if(exposureDate == null || exposureDate.isBefore(current) || exposureDate.isEqual(current)
                 || exposureDate.isBefore(originExposureDate)) {

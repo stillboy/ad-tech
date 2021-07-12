@@ -33,7 +33,7 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
     public List<ResponseCreative> searchTop10Advertisement() {
         List<AdvertisementDocument> results = mongoTemplate.findAll(AdvertisementDocument.class);
 
-        if(results == null || results.size()==0) {
+        if(results == null || results.size() == 0) {
            return new ArrayList<ResponseCreative>();
         }
 
@@ -93,7 +93,7 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
         Long minDate = (Long)map.get("minDate");
         Long maxDate = (Long)map.get("maxDate");
 
-        long convertedTime = time.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond()*1000;
+        long convertedTime = time.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
 
         double bidScore = 0, dateScore = 0;
 
@@ -123,8 +123,6 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
             if(minDate > currentDate) minDate = currentDate;
             if(maxDate < currentDate) maxDate = currentDate;
         }
-
-        minDate *= 1000; maxDate *= 1000;
 
         resultMap.put("minBid", minBid);
         resultMap.put("maxBid", maxBid);
