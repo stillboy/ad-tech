@@ -148,20 +148,11 @@ public class Advertisement {
     }
 
     public void changeDuration(LocalDateTime exposureDate, LocalDateTime expiryDate) {
-        if(this.exposureDate.equals(exposureDate) && this.expiryDate.equals(expiryDate)) return;
-
-        StatusStrategy strategy = null;
-
-        switch (status) {
-            case WAITING: strategy = new WaitingStatusStrategy(); break;
-            case ADVERTISING: strategy = new AdvertisingStatusStrategy(); break;
-            case EXPIRED: strategy = new ExpiredStatusStrategy(); break;
-            case DELETED: strategy = new DeletedStatusStrategy(); break;
-            default:
-                throw new RuntimeException();
+        if(this.exposureDate.equals(exposureDate)
+                && this.expiryDate.equals(expiryDate)) {
+            return;
         }
-
-        strategy.changeDuration(this, exposureDate, expiryDate);
+        status.getStrategy().changeDuration(this, exposureDate, expiryDate);
     }
 
     public void changeExposureDate(LocalDateTime exposureDate) {

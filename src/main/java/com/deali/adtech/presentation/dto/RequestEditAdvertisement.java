@@ -33,6 +33,5 @@ public class RequestEditAdvertisement {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime expiryDate;
 
-    @NotNull(message = "광고에 기재할 이미지를 업로드해주세요.")
     private MultipartFile newImage;
 }

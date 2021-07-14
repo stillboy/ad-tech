@@ -55,6 +55,10 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
                         .limit(10)
                         .collect(Collectors.toList());
 
+        if(responseCreativeList.size()==1) {
+            responseCreativeList.get(0).setScore(1.0);
+        }
+
         return responseCreativeList;
     }
 

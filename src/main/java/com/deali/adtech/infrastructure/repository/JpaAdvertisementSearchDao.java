@@ -41,12 +41,22 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
                 .from(advertisement)
                 .leftJoin(advertisementExposeCount)
                 .on(advertisement.id.eq(advertisementExposeCount.advertisement.id))
+                .where(titleEq(searchCondition.getTitle()),
+                        statusEq(searchCondition.getStatus()))
                 .orderBy(advertisement.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetchResults();
 
         return new PageImpl<ResponseAdvertisement>(result.getResults(), pageable, result.getTotal());
+    }
+
+    private BooleanExpression titleEq(String title) {
+        return title==null?null:advertisement.title.eq(title);
+    }
+
+    private BooleanExpression statusEq(AdvertisementStatus status) {
+        return status==null?null:advertisement.status.eq(status);
     }
 
     @Override

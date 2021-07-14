@@ -1,4 +1,6 @@
-package com.deali.adtech.domain;
+package com.deali.adtech.domain.service;
+
+import com.deali.adtech.domain.Advertisement;
 
 import java.time.LocalDateTime;
 

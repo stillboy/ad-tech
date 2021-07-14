@@ -1,11 +1,13 @@
-package com.deali.adtech.domain;
+package com.deali.adtech.domain.service;
 
+import com.deali.adtech.domain.Advertisement;
+import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.infrastructure.exception.AlreadyRemovedAdvertisementException;
 import com.deali.adtech.infrastructure.exception.StatusMismatchException;
 
 import java.time.LocalDateTime;
 
-public class DeletedStatusStrategy implements StatusStrategy{
+public class DeletedStatusStrategy implements StatusStrategy {
     @Override
     public void changeDuration(Advertisement advertisement, LocalDateTime exposureDate, LocalDateTime expiryDate) {
         if(advertisement.getStatus() != AdvertisementStatus.DELETED) {

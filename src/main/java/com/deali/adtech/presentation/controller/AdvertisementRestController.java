@@ -32,7 +32,10 @@ public class AdvertisementRestController {
     }
 
     @GetMapping
-    public ResponseEntity getAdvertisementList(Pageable pageable, AdvertisementSearchCondition searchCondition) {
+    public ResponseEntity getAdvertisementList(Pageable pageable,
+                                               AdvertisementSearchCondition searchCondition) {
+        System.out.println(searchCondition.getTitle());
+        System.out.println(searchCondition.getStatus());
         Page<ResponseAdvertisement> results =
                 advertisementSearchDao.searchAdvertisement(pageable, searchCondition);
 

@@ -1,16 +1,17 @@
-package com.deali.adtech.domain;
+package com.deali.adtech.domain.service;
 
+import com.deali.adtech.domain.Advertisement;
+import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.infrastructure.exception.InvalidExpiryDateException;
 import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
 import com.deali.adtech.infrastructure.exception.StatusMismatchException;
 
 import java.time.LocalDateTime;
 
-public class ExpiredStatusStrategy implements StatusStrategy{
-
+public class WaitingStatusStrategy implements StatusStrategy{
     @Override
     public void changeDuration(Advertisement advertisement, LocalDateTime exposureDate, LocalDateTime expiryDate) {
-        if(advertisement.getStatus() != AdvertisementStatus.EXPIRED) {
+        if(advertisement.getStatus() != AdvertisementStatus.WAITING) {
             throw new StatusMismatchException();
         }
 
@@ -19,7 +20,6 @@ public class ExpiredStatusStrategy implements StatusStrategy{
 
         advertisement.changeExposureDate(exposureDate);
         advertisement.changeExpiryDate(expiryDate);
-        advertisement.updateExpiredDuration();
     }
 
     @Override
@@ -29,9 +29,7 @@ public class ExpiredStatusStrategy implements StatusStrategy{
 
         if(exposureDate != null && exposureDate.isEqual(originExposureDate)) return;
 
-        if(exposureDate == null
-                || !exposureDate.isAfter(current)
-                || !exposureDate.isAfter(originExposureDate)) {
+        if(exposureDate == null || exposureDate.isBefore(current) || exposureDate.isEqual(current)) {
             throw new InvalidExposureDateException();
         }
     }
@@ -42,14 +40,15 @@ public class ExpiredStatusStrategy implements StatusStrategy{
         LocalDateTime originExposureDate = advertisement.getExposureDate();
         LocalDateTime originExpiryDate = advertisement.getExpiryDate();
 
-        if(expiryDate == null
-                || !expiryDate.isAfter(current)
-                || expiryDate.isEqual(originExpiryDate)) {
+        if(expiryDate != null && expiryDate.isEqual(originExpiryDate)) return;
+
+        if(expiryDate == null || expiryDate.isBefore(current)) {
             throw new InvalidExpiryDateException();
         }
 
-        if(!expiryDate.isAfter(originExpiryDate)) {
+        if(expiryDate.isEqual(exposureDate) || expiryDate.isBefore(exposureDate)) {
             throw new InvalidExpiryDateException();
         }
     }
+
 }
