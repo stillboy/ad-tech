@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestControllerAdvice
@@ -45,7 +45,7 @@ public class AdvertisementExceptionHandler {
         for(FieldError error : bindingResult.getFieldErrors()) {
             String customMessage = Arrays.stream(Objects.requireNonNull(error.getCodes()))
                     .map(code -> {
-                        try{
+                        try {
                             return messageSource.getMessage(
                                     code,
                                     error.getArguments(),
@@ -58,6 +58,7 @@ public class AdvertisementExceptionHandler {
                     .filter(Objects::nonNull)
                     .findFirst()
                     .orElse(error.getDefaultMessage());
+
             fieldErrors.add(ErrorResponse.CustomFieldError.of(error,customMessage));
         }
 
@@ -165,6 +166,17 @@ public class AdvertisementExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
+    }
+
+    @ExceptionHandler(InvalidTitleException.class)
+    public ResponseEntity handleInvalidTitleException(InvalidTitleException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.INVALID_TITLE)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
 }

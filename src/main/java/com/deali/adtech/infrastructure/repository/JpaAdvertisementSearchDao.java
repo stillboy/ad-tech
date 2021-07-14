@@ -36,8 +36,11 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
         QueryResults<ResponseAdvertisement> result = queryFactory
                 .select(new QResponseAdvertisement(advertisement.id, advertisement.title,
                         advertisement.winningBid, advertisement.createdAt, advertisement.modifiedAt,
-                        advertisement.exposureDate, advertisement.expiryDate, advertisement.status))
+                        advertisement.exposureDate, advertisement.expiryDate, advertisement.status,
+                        advertisementExposeCount.exposeCount))
                 .from(advertisement)
+                .leftJoin(advertisementExposeCount)
+                .on(advertisement.id.eq(advertisementExposeCount.advertisement.id))
                 .orderBy(advertisement.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

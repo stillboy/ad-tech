@@ -20,8 +20,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.event.TransactionalApplicationListenerMethodAdapter;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.File;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -229,7 +232,6 @@ public class AdvertisementServiceUnitTest {
         advertisementService.editAdvertisement(request);
 
         /* then */
-
         assertThat(advertisement)
                 .hasFieldOrPropertyWithValue("title", request.getTitle())
                 .hasFieldOrPropertyWithValue("winningBid", request.getWinningBid())

@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -53,8 +52,8 @@ public class Advertisement {
     @Builder
     public Advertisement(String title, Integer winningBid, LocalDateTime expiryDate,
                          LocalDateTime exposureDate) {
-        this.title = title;
-        this.winningBid = winningBid;
+        editTitle(title);
+        changeWinningBid(winningBid);
         this.createdAt = LocalDateTime.now();
         this.modifiedAt = LocalDateTime.from(this.createdAt);
         initExposureDate(exposureDate);
@@ -63,7 +62,14 @@ public class Advertisement {
     }
 
     public void editTitle(String title) {
-        if(title == null || title.trim().length() == 0) {
+        if(title == null) {
+            throw new InvalidTitleException();
+        }
+
+        title = title.replaceAll("^\\s+","");
+        title = title.replaceAll("\\s+$","");
+
+        if(title.length() < 2 || title.length() > 255) {
             throw new InvalidTitleException();
         }
 

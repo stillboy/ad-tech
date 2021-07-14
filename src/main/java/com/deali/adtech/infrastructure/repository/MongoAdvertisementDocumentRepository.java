@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,9 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
     private Double bidRate;
     @Value("${pool.date-rate}")
     private Double dateRate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    @Value("${pool.reference-date}")
+    private LocalDateTime referenceDate;
 
     @Override
     public List<ResponseCreative> searchTop10Advertisement() {
@@ -93,7 +97,9 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
         Long minDate = (Long)map.get("minDate");
         Long maxDate = (Long)map.get("maxDate");
 
+        long referenceTime = referenceDate.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
         long convertedTime = time.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
+        convertedTime -= referenceTime;
 
         double bidScore = 0, dateScore = 0;
 
@@ -113,10 +119,12 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
 
         Integer minBid = Integer.MAX_VALUE, maxBid = Integer.MIN_VALUE;
         Long minDate = Long.MAX_VALUE, maxDate = Long.MIN_VALUE;
+        long referenceTime = referenceDate.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
 
         for(AdvertisementDocument advertisement : advertisements) {
             int currentBid = advertisement.getWinningBid();
             long currentDate = advertisement.getModifiedAt().atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
+            currentDate -= referenceTime;
 
             if(minBid > currentBid) minBid = advertisement.getWinningBid();
             if(maxBid < currentBid) maxBid = advertisement.getWinningBid();

@@ -42,7 +42,9 @@ public class ExpiredStatusStrategy implements StatusStrategy{
         LocalDateTime originExposureDate = advertisement.getExposureDate();
         LocalDateTime originExpiryDate = advertisement.getExpiryDate();
 
-        if(expiryDate == null || expiryDate.isBefore(current) || expiryDate.isEqual(originExpiryDate)) {
+        if(expiryDate == null
+                || !expiryDate.isAfter(current)
+                || expiryDate.isEqual(originExpiryDate)) {
             throw new InvalidExpiryDateException();
         }
 

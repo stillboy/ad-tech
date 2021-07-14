@@ -6,20 +6,27 @@ import com.deali.adtech.domain.AdvertisementStatus;
 import com.deali.adtech.infrastructure.util.event.AdvertisementChangedEvent;
 import com.deali.adtech.infrastructure.util.event.AdvertisementPostponedEvent;
 import com.deali.adtech.infrastructure.util.mapper.AdvertisementDocumentMapper;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.AbstractApplicationEventMulticaster;
+import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalApplicationListenerMethodAdapter;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.Executor;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,7 +67,6 @@ class AdvertisementEventHandlerUnitTest {
 
         Criteria criteria = new Criteria("advertisementId").is(target.getId());
         Query findQuery = new Query().addCriteria(criteria);
-
 
         AdvertisementDocument result = mongoTemplate.findOne(findQuery, AdvertisementDocument.class);
         /* then */

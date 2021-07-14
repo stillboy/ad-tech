@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +79,15 @@ public class ErrorResponse {
                     fieldError.getField(),
                     customMessage,
                     rejectedValue
+            );
+        }
+
+        public static CustomFieldError of(ObjectError error, String customMessage) {
+            String emptyResult = "";
+            return new CustomFieldError(
+                    emptyResult,
+                    error.getDefaultMessage(),
+                    emptyResult
             );
         }
     }
