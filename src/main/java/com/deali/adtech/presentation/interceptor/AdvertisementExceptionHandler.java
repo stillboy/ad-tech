@@ -179,4 +179,15 @@ public class AdvertisementExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
+
+    @ExceptionHandler(InvalidPausedRequestException.class)
+    public ResponseEntity handleInvalidPausedRequestException(InvalidPausedRequestException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.INVALID_PAUSE_REQUEST)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
 }

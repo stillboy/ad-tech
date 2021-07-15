@@ -22,8 +22,9 @@ public class LoggingAspect {
     private final ExposedLogMapper logMapper;
 
     @Transactional
-    @AfterReturning(pointcut = "@annotation(com.deali.adtech.infrastructure.util.annotation.AdvertisementExposed)",
-    returning = "exposedList")
+    @AfterReturning(
+            pointcut = "@annotation(com.deali.adtech.infrastructure.util.annotation.AdvertisementExposed)",
+            returning = "exposedList")
     public void writeAdvertisementExposedLog(List<ResponseCreative> exposedList) {
         exposedList.forEach( advertisement -> {
             ExposedLog log = logMapper.toLog(advertisement);

@@ -4,13 +4,15 @@ import com.deali.adtech.domain.*;
 import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
+import com.deali.adtech.infrastructure.util.event.AdvertisementChangedEvent;
 import com.deali.adtech.infrastructure.util.mapper.AdvertisementMapper;
 import com.deali.adtech.infrastructure.util.support.FileUploadSupport;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
 import com.deali.adtech.presentation.dto.RequestEditAdvertisement;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,6 +78,11 @@ public class AdvertisementService {
 
             fileUploadSupport.exchangeMultipartFileImage(newImage, oldFilePath, newFilePath);
         }
+    }
+
+    public void pauseAdvertisement(@NonNull Long advertisementId) {
+        Advertisement advertisement = getAdvertisementEntity(advertisementId);
+        advertisement.pause();
     }
 
     public void removeAdvertisement(@NonNull Long advertisementId) {

@@ -94,7 +94,6 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
         mongoTemplate.findAndModify(query, update, options, AdvertisementDocument.class);
     }
 
-    //TODO::딱 strategy 패턴인데?
     private double calculateScore(int bid, LocalDateTime time, Map<String, Number> map) {
         Integer minBid = (Integer)map.get("minBid");
         Integer maxBid = (Integer)map.get("maxBid");

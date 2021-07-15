@@ -2,11 +2,13 @@ package com.deali.adtech.domain;
 
 import com.deali.adtech.infrastructure.exception.*;
 import com.deali.adtech.infrastructure.util.event.AdvertisementChangedEvent;
+import com.deali.adtech.infrastructure.util.event.AdvertisementPausedEvent;
 import com.deali.adtech.infrastructure.util.event.AdvertisementRemovedEvent;
 import com.deali.adtech.infrastructure.util.event.Events;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -147,9 +149,22 @@ public class Advertisement {
         this.expiryDate = expiryDate;
     }
 
+    public void changeStatusToWaiting() {
+        this.status = AdvertisementStatus.WAITING;
+    }
+
+    public void pause() {
+        if(this.status == AdvertisementStatus.EXPIRED
+                || this.status == AdvertisementStatus.DELETED
+                || this.status == AdvertisementStatus.PAUSED) {
+            throw new InvalidPausedRequestException();
+        }
+        this.status = AdvertisementStatus.PAUSED;
+        Events.raise(new AdvertisementPausedEvent(this));
+    }
+
     public void changeDuration(LocalDateTime exposureDate, LocalDateTime expiryDate) {
-        if(this.exposureDate.equals(exposureDate)
-                && this.expiryDate.equals(expiryDate)) {
+        if(this.exposureDate.equals(exposureDate) && this.expiryDate.equals(expiryDate)) {
             return;
         }
         status.getStrategy().changeDuration(this, exposureDate, expiryDate);
@@ -158,7 +173,6 @@ public class Advertisement {
     public void changeExposureDate(LocalDateTime exposureDate) {
         this.exposureDate = exposureDate;
     }
-
     public void changeExpiryDate(LocalDateTime expiryDate) {
         this.expiryDate = expiryDate;
     }

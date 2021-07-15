@@ -34,6 +34,7 @@ public class AdvertisementRestController {
     @GetMapping
     public ResponseEntity getAdvertisementList(Pageable pageable,
                                                AdvertisementSearchCondition searchCondition) {
+
         System.out.println(searchCondition.getTitle());
         System.out.println(searchCondition.getStatus());
         Page<ResponseAdvertisement> results =
@@ -66,6 +67,19 @@ public class AdvertisementRestController {
         ResponseEditAdvertisement response =
                 new ResponseEditAdvertisement(ResponseMessage.ADVERTISEMENT_EDITED.getMessage(),
                         advertisementId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @PatchMapping("/{creativeId}")
+    public ResponseEntity pauseAdvertisement(@PathVariable("creativeId") Long advertisementId) {
+        advertisementService.pauseAdvertisement(advertisementId);
+
+        ResponsePauseAdvertisement response
+                = new ResponsePauseAdvertisement(ResponseMessage.ADVERTISEMENT_PAUSED.getMessage()
+                , advertisementId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

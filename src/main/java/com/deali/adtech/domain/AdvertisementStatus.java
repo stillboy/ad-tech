@@ -8,7 +8,9 @@ public enum AdvertisementStatus {
     WAITING(new WaitingStatusStrategy()),
     ADVERTISING(new AdvertisingStatusStrategy()),
     EXPIRED(new ExpiredStatusStrategy()),
-    DELETED(new DeletedStatusStrategy());
+    DELETED(new DeletedStatusStrategy()),
+    PAUSED(new PausedStatusStrategy())
+    ;
 
     private final StatusStrategy strategy;
 
