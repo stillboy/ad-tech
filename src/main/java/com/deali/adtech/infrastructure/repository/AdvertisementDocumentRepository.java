@@ -9,4 +9,5 @@ public interface AdvertisementDocumentRepository {
     List<ResponseCreative> searchTop10Advertisement();
     void remove(AdvertisementDocument document);
     void update(AdvertisementDocument document);
+    void insert(AdvertisementDocument document);
 }

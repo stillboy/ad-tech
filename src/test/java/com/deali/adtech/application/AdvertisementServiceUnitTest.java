@@ -385,6 +385,82 @@ public class AdvertisementServiceUnitTest {
         /* then */
     }
 
+    @Test
+    @DisplayName("소재 일시정지 성공 테스트")
+    public void pause_advertisement_success_test() throws Exception {
+        /* given */
+        ReflectionTestUtils.setField(advertisement, "status", AdvertisementStatus.ADVERTISING);
+
+        given(advertisementRepository.findById(any()))
+                .willReturn(Optional.of(advertisement));
+
+        /* when */
+        advertisementService.pauseAdvertisement(advertisement.getId());
+
+        /* then */
+        assertThat(advertisement.getStatus())
+                .isEqualTo(AdvertisementStatus.PAUSED);
+    }
+
+    @Test
+    @DisplayName("소재 일시정지 실패 테스트 현재 광고중인 광고가 아닐 경우")
+    public void pause_advertisement_fail_test_invalid_status() throws Exception {
+        /* given */
+        given(advertisementRepository.findById(any()))
+                .willReturn(Optional.of(advertisement));
+
+        /* when */
+        assertThatExceptionOfType(InvalidPausedRequestException.class).isThrownBy(()->{
+            advertisementService.pauseAdvertisement(advertisement.getId());
+        });
+
+        /* then */
+    }
+
+    @Test
+    @DisplayName("소재 재개 성공 테스트")
+    public void unPause_advertisement_success_test() throws Exception {
+        /* given */
+        LocalDateTime exposureDate = LocalDateTime.now().minusDays(10);
+        LocalDateTime expiryDate = LocalDateTime.now().plusDays(30);
+
+        ReflectionTestUtils.setField(advertisement, "status", AdvertisementStatus.PAUSED);
+        ReflectionTestUtils.setField(advertisement, "exposureDate", exposureDate);
+        ReflectionTestUtils.setField(advertisement, "expiryDate", expiryDate);
+
+        given(advertisementRepository.findById(any()))
+                .willReturn(Optional.of(advertisement));
+
+        /* when */
+        advertisementService.unPauseAdvertisement(advertisement.getId());
+
+        /* then */
+        assertThat(advertisement.getStatus())
+                .isEqualTo(AdvertisementStatus.ADVERTISING);
+    }
+
+    @Test
+    @DisplayName("소재 재개 실패 테스트 현재 일시정지 중인 광고가 아닐 경우")
+    public void unPause_advertisement_fail_test_invalid_status() throws Exception {
+        /* given */
+        LocalDateTime exposureDate = LocalDateTime.now().minusDays(10);
+        LocalDateTime expiryDate = LocalDateTime.now().plusDays(30);
+
+        ReflectionTestUtils.setField(advertisement, "status", AdvertisementStatus.ADVERTISING);
+        ReflectionTestUtils.setField(advertisement, "exposureDate", exposureDate);
+        ReflectionTestUtils.setField(advertisement, "expiryDate", expiryDate);
+
+        given(advertisementRepository.findById(any()))
+                .willReturn(Optional.of(advertisement));
+
+        /* when */
+        assertThatExceptionOfType(StatusMismatchException.class).isThrownBy(()->{
+            advertisementService.unPauseAdvertisement(advertisement.getId());
+        });
+
+        /* then */
+    }
+
     private MockMultipartFile mockMultipartFile(String name, String originFileName) {
         MockMultipartFile file = null;
         File image = new File(TEST_PATH + originFileName);

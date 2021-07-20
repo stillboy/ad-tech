@@ -21,7 +21,6 @@ public class PausedStatusStrategy implements StatusStrategy {
         advertisement.changeExposureDate(exposureDate);
         advertisement.changeExpiryDate(expiryDate);
 
-        advertisement.changeStatusToWaiting();
     }
 
     @Override

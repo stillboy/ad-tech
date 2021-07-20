@@ -7,6 +7,7 @@ import com.deali.adtech.infrastructure.repository.AdvertisementDocumentRepositor
 import com.deali.adtech.infrastructure.util.event.AdvertisementChangedEvent;
 import com.deali.adtech.infrastructure.util.event.AdvertisementPausedEvent;
 import com.deali.adtech.infrastructure.util.event.AdvertisementPostponedEvent;
+import com.deali.adtech.infrastructure.util.event.AdvertisementUnPausedEvent;
 import com.deali.adtech.infrastructure.util.mapper.AdvertisementDocumentMapper;
 import lombok.RequiredArgsConstructor;
 
@@ -47,5 +48,14 @@ public class AdvertisementEventHandler {
         AdvertisementDocument document = documentMapper.entityToDocument(target);
 
         repository.remove(document);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleAdvertisementUnPausedEvent(AdvertisementUnPausedEvent event) {
+        Advertisement target = event.getAdvertisement();
+
+        AdvertisementDocument document = documentMapper.entityToDocument(target);
+
+        repository.insert(document);
     }
 }

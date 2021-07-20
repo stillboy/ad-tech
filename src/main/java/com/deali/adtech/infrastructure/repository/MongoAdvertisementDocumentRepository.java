@@ -94,15 +94,18 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
         mongoTemplate.findAndModify(query, update, options, AdvertisementDocument.class);
     }
 
+    @Override
+    public void insert(AdvertisementDocument document) {
+        mongoTemplate.insert(document);
+    }
+
     private double calculateScore(int bid, LocalDateTime time, Map<String, Number> map) {
         Integer minBid = (Integer)map.get("minBid");
         Integer maxBid = (Integer)map.get("maxBid");
         Long minDate = (Long)map.get("minDate");
         Long maxDate = (Long)map.get("maxDate");
 
-        long referenceTime = referenceDate.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
         long convertedTime = time.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
-        convertedTime -= referenceTime;
 
         double bidScore = 0, dateScore = 0;
 
@@ -120,18 +123,17 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
     private Map<String, Number> getMinMaxWinningBidAndModifiedAt(List<AdvertisementDocument> advertisements) {
         Map<String, Number> resultMap = new HashMap<>();
 
-        Integer minBid = Integer.MAX_VALUE, maxBid = Integer.MIN_VALUE;
-        Long minDate = Long.MAX_VALUE, maxDate = Long.MIN_VALUE;
-        long referenceTime = referenceDate.atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
+        Integer minBid = 1, maxBid = Integer.MIN_VALUE;
+        Long minDate = LocalDateTime.of(2021,6,1,0,0)
+                .atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
+        Long maxDate = Long.MIN_VALUE;
+
 
         for(AdvertisementDocument advertisement : advertisements) {
             int currentBid = advertisement.getWinningBid();
             long currentDate = advertisement.getModifiedAt().atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
-            currentDate -= referenceTime;
 
-            if(minBid > currentBid) minBid = advertisement.getWinningBid();
             if(maxBid < currentBid) maxBid = advertisement.getWinningBid();
-            if(minDate > currentDate) minDate = currentDate;
             if(maxDate < currentDate) maxDate = currentDate;
         }
 

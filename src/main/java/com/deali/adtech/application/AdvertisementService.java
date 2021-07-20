@@ -5,6 +5,8 @@ import com.deali.adtech.infrastructure.repository.AdvertisementImageRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementRepository;
 import com.deali.adtech.infrastructure.repository.AdvertisementExposeCountRepository;
 import com.deali.adtech.infrastructure.util.event.AdvertisementChangedEvent;
+import com.deali.adtech.infrastructure.util.event.AdvertisementRegisteredEvent;
+import com.deali.adtech.infrastructure.util.event.Events;
 import com.deali.adtech.infrastructure.util.mapper.AdvertisementMapper;
 import com.deali.adtech.infrastructure.util.support.FileUploadSupport;
 import com.deali.adtech.presentation.dto.RequestCreateAdvertisement;
@@ -99,5 +101,10 @@ public class AdvertisementService {
                 imageRepository.findByAdvertisementId(advertisement.getId());
 
         return images.get(0);
+    }
+
+    public void unPauseAdvertisement(Long advertisementId) {
+        Advertisement advertisement = getAdvertisementEntity(advertisementId);
+        advertisement.unPause();
     }
 }

@@ -34,11 +34,8 @@ public class AdvertisementRestController {
     @GetMapping
     public ResponseEntity getAdvertisementList(Pageable pageable,
                                                AdvertisementSearchCondition searchCondition) {
-
-        System.out.println(searchCondition.getTitle());
-        System.out.println(searchCondition.getStatus());
-        Page<ResponseAdvertisement> results =
-                advertisementSearchDao.searchAdvertisement(pageable, searchCondition);
+        Page<ResponseAdvertisement> results
+                = advertisementSearchDao.searchAdvertisement(pageable, searchCondition);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -79,6 +76,19 @@ public class AdvertisementRestController {
 
         ResponsePauseAdvertisement response
                 = new ResponsePauseAdvertisement(ResponseMessage.ADVERTISEMENT_PAUSED.getMessage()
+                , advertisementId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @PatchMapping("/{creativeId}/unpause")
+    public ResponseEntity unPauseAdvertisement(@PathVariable("creativeId") Long advertisementId) {
+        advertisementService.unPauseAdvertisement(advertisementId);
+
+        ResponseUnPauseAdvertisement response
+                = new ResponseUnPauseAdvertisement(ResponseMessage.ADVERTISEMENT_UNPAUSE.getMessage()
                 , advertisementId);
 
         return ResponseEntity

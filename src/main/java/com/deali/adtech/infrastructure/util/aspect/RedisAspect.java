@@ -23,7 +23,7 @@ public class RedisAspect {
     public void increaseRedisExposedCount(List<ResponseCreative> exposedList) {
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
 
-        exposedList.forEach( advertisement -> {
+        exposedList.forEach(advertisement -> {
             operations.increment(advertisement.getAdvertisementId().toString());
         });
     }
