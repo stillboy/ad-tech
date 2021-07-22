@@ -1,5 +1,10 @@
 server:
-  port: 8080
+  port: 8000
+
+  servlet:
+    encoding:
+      charset: UTF-8
+
 
 spring:
   application:
@@ -11,9 +16,13 @@ spring:
       port: 27017
       host: localhost
 
+  redis:
+    host: localhost
+    port: 6379
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/adtech?serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/adtech?serverTimezone=Asia/Seoul
     username: root
     password: qnwk052911!
 
@@ -21,3 +30,21 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+
+  devtools:
+    livereload:
+      enabled: true
+
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+
+image:
+  advertisement:
+    default-path: /usr/local/var/www/
+
+pool:
+  bid-rate: 0.6
+  date-rate: 0.4
+  reference-date: 2021-06-01T00:00

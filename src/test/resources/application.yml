@@ -1,0 +1,24 @@
+server:
+  port: 8000
+  servlet:
+    encoding:
+      charset: utf-8
+      force: true
+
+spring:
+  application:
+    name: adtech
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  h2:
+
+image:
+  advertisement:
+    default-path: /Users/admin/temp-image/
+
+pool:
+  bid-rate: 0.6
+  date-rate: 0.4
+  reference-date: 2021-06-01T00:00

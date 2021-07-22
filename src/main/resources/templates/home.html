@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div th:if="${errors != null}">
+        <ul th:each="error : ${errors}">
+            <li th:text="${error.defaultMessage}"></li>
+        </ul>
+    </div>
+    <ul>
+    </ul>
+</body>
+</html>

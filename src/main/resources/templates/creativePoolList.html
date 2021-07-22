@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<style>
+  table {
+    width: 100%;
+    border: 1px solid #444444;
+  }
+  th, td {
+    border: 1px solid #444444;
+  }
+</style>
+<body>
+<table class="tb_col">
+  <tr>
+    <th>도큐먼트 아이디</th>
+    <th>테이블 번호</th>
+    <th>제목</th>
+    <th>낙찰가</th>
+    <th>광고 만료일</th>
+    <th>수정일</th>
+    <th>점수</th>
+    <th>광고 이미지</th>
+  </tr>
+  <tr th:each="creative : ${creativeList}">
+    <td th:text="${creative._id}"> </td>
+    <td th:text="${creative.advertisementId}"> </td>
+    <td th:text="${creative.title}"> </td>
+    <td th:text="${creative.winningBid}"> </td>
+    <td th:text="${creative.expiryDate}"> </td>
+    <td th:text="${creative.modifiedAt}"> </td>
+    <td th:text="${creative.score}"> </td>
+    <td><img th:src="${creative.imagePath}"> </td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body th:align="left">
+  <form>
+    <div>제목: <input type='text' name='title'/></div>
+    <div>낙찰가: <input type='text' name='winningBid'/></div>
+    <div>이미지: <input type='file' name='newImage'/></div>
+    <div> </div>
+  </form>
+
+  <form th:action="'/core/v1/creative/'+ ${creative.id} +'/delete'" th:method="post">
+    <div><button type="submit">삭제하기</button></div>
+  </form>
+</body>
+</html>

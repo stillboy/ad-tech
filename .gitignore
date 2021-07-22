@@ -4,6 +4,10 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+*.jpg
+*.jpeg
+*.png
+*.gif
 
 ### STS ###
 .apt_generated
