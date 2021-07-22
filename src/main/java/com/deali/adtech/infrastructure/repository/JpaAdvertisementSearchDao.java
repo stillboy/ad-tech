@@ -46,7 +46,7 @@ public class JpaAdvertisementSearchDao implements AdvertisementSearchDao {
                 .on(advertisement.id.eq(advertisementExposeCount.advertisement.id))
                 .where(titleEq(searchCondition.getTitle()),
                         statusEq(searchCondition.getStatus()))
-                .orderBy(advertisement.createdAt.desc())
+                .orderBy(advertisement.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetchResults();

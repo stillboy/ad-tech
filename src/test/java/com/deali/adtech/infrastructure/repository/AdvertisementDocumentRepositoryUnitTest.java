@@ -16,6 +16,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 
@@ -66,7 +68,7 @@ public class AdvertisementDocumentRepositoryUnitTest {
         ResponseCreative minScore = results.get(results.size()-1);
 
         /* then */
-        assertThat(results).hasSize(10);
+        assertThat(results).hasSize(5);
         assertThat(maxScore.getScore())
                 .isGreaterThanOrEqualTo(minScore.getScore());
     }
@@ -115,6 +117,12 @@ public class AdvertisementDocumentRepositoryUnitTest {
         /* then */
         assertThat(target)
                 .hasFieldOrPropertyWithValue("title", updatedTitle);
+    }
+
+    @Test
+    public void timeTest() {
+        LocalDateTime time = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+        System.out.println(time);
     }
 
     private String randomString() {

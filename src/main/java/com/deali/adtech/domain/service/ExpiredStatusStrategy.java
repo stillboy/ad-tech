@@ -7,6 +7,7 @@ import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
 import com.deali.adtech.infrastructure.exception.StatusMismatchException;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class ExpiredStatusStrategy implements StatusStrategy {
 
@@ -26,13 +27,13 @@ public class ExpiredStatusStrategy implements StatusStrategy {
 
     @Override
     public void validateExposureDate(Advertisement advertisement, LocalDateTime exposureDate) {
-        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime current = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime originExposureDate = advertisement.getExposureDate();
 
         if(exposureDate != null && exposureDate.isEqual(originExposureDate)) return;
 
         if(exposureDate == null
-                || !exposureDate.isAfter(current)
+                || exposureDate.isBefore(current)
                 || !exposureDate.isAfter(originExposureDate)) {
             throw new InvalidExposureDateException();
         }
@@ -40,7 +41,7 @@ public class ExpiredStatusStrategy implements StatusStrategy {
 
     @Override
     public void validateExpiryDate(Advertisement advertisement, LocalDateTime expiryDate, LocalDateTime exposureDate) {
-        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime current = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime originExposureDate = advertisement.getExposureDate();
         LocalDateTime originExpiryDate = advertisement.getExpiryDate();
 

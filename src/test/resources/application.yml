@@ -8,13 +8,11 @@ server:
 spring:
   application:
     name: adtech
-
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
   h2:
-
 
 image:
   advertisement:

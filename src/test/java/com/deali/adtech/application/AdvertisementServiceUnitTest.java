@@ -332,7 +332,7 @@ public class AdvertisementServiceUnitTest {
    public void edit_advertisement_fail_test_invalid_exposure_date() throws Exception {
        /* given */
        LocalDateTime newExposureDate = LocalDateTime.from(advertisement.getExposureDate())
-               .minusDays(30);
+               .minusDays(31);
        LocalDateTime newExpiryDate = LocalDateTime.from(advertisement.getExpiryDate())
                .plusDays(30);
 
@@ -403,9 +403,10 @@ public class AdvertisementServiceUnitTest {
     }
 
     @Test
-    @DisplayName("소재 일시정지 실패 테스트 현재 광고중인 광고가 아닐 경우")
+    @DisplayName("소재 일시정지 실패 테스트 현재 광고중이거나 대기중인 광고가 아닐 경우")
     public void pause_advertisement_fail_test_invalid_status() throws Exception {
         /* given */
+        ReflectionTestUtils.setField(advertisement,"status", AdvertisementStatus.EXPIRED);
         given(advertisementRepository.findById(any()))
                 .willReturn(Optional.of(advertisement));
 

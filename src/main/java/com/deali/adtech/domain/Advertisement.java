@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Entity
@@ -125,7 +126,9 @@ public class Advertisement {
     }
 
     protected void initExposureDate(LocalDateTime exposureDate) {
-        if(exposureDate == null || exposureDate.isBefore(this.createdAt)) {
+        LocalDateTime currentTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+
+        if(exposureDate == null || exposureDate.isBefore(currentTime)) {
             throw new InvalidExposureDateException();
         }
 
@@ -133,12 +136,10 @@ public class Advertisement {
     }
 
     protected void initExpiryDate(LocalDateTime expiryDate) {
-        if(expiryDate == null || expiryDate.isBefore(this.createdAt)
-                || expiryDate.equals(exposureDate)) {
-            throw new InvalidExpiryDateException();
-        }
+        if(expiryDate == null
+                || this.exposureDate == null
+                || !expiryDate.isAfter(this.exposureDate)) {
 
-        if(this.exposureDate == null || expiryDate.isBefore(this.exposureDate)) {
             throw new InvalidExpiryDateException();
         }
 

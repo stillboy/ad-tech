@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,7 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
         }
 
         Map<String, Number> map = getMinMaxWinningBidAndModifiedAt(results);
+        LocalDateTime currentTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
 
         List<ResponseCreative> responseCreativeList =
                 results.stream()
@@ -52,7 +54,8 @@ public class MongoAdvertisementDocumentRepository implements AdvertisementDocume
                     return documentMapper.documentToDto(document, score);
                 })
                         .sorted((d1,d2)->d2.getScore().compareTo(d1.getScore()))
-                        .limit(10)
+                        .filter(document -> document.getExpiryDate().isAfter(currentTime))
+                        .limit(5)
                         .collect(Collectors.toList());
 
         if(responseCreativeList.size()==1) {

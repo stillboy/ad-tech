@@ -7,6 +7,7 @@ import com.deali.adtech.infrastructure.exception.InvalidExposureDateException;
 import com.deali.adtech.infrastructure.exception.StatusMismatchException;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class WaitingStatusStrategy implements StatusStrategy{
     @Override
@@ -24,20 +25,19 @@ public class WaitingStatusStrategy implements StatusStrategy{
 
     @Override
     public void validateExposureDate(Advertisement advertisement, LocalDateTime exposureDate) {
-        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime current = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime originExposureDate = advertisement.getExposureDate();
 
         if(exposureDate != null && exposureDate.isEqual(originExposureDate)) return;
 
-        if(exposureDate == null || !exposureDate.isAfter(current)) {
+        if(exposureDate == null || exposureDate.isBefore(current)) {
             throw new InvalidExposureDateException();
         }
     }
 
     @Override
     public void validateExpiryDate(Advertisement advertisement, LocalDateTime expiryDate, LocalDateTime exposureDate) {
-        LocalDateTime current = LocalDateTime.now();
-        LocalDateTime originExposureDate = advertisement.getExposureDate();
+        LocalDateTime current = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime originExpiryDate = advertisement.getExpiryDate();
 
         if(expiryDate != null && expiryDate.isEqual(originExpiryDate)) return;
@@ -46,7 +46,7 @@ public class WaitingStatusStrategy implements StatusStrategy{
             throw new InvalidExpiryDateException();
         }
 
-        if(expiryDate.isEqual(exposureDate) || expiryDate.isBefore(exposureDate)) {
+        if(!expiryDate.isAfter(exposureDate)) {
             throw new InvalidExpiryDateException();
         }
     }

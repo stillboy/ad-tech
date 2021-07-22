@@ -9,6 +9,7 @@ import com.deali.adtech.infrastructure.util.event.AdvertisementPostponedEvent;
 import com.deali.adtech.infrastructure.util.event.Events;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class AdvertisingStatusStrategy implements StatusStrategy {
     @Override
@@ -34,12 +35,13 @@ public class AdvertisingStatusStrategy implements StatusStrategy {
 
     @Override
     public void validateExposureDate(Advertisement advertisement, LocalDateTime exposureDate) {
-        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime current = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime originExposureDate = advertisement.getExposureDate();
 
         if(exposureDate != null && exposureDate.isEqual(originExposureDate)) return;
 
-        if(exposureDate == null || exposureDate.isBefore(current) || exposureDate.isEqual(current)
+        if(exposureDate == null
+                || exposureDate.isBefore(current)
                 || exposureDate.isBefore(originExposureDate)) {
             throw new InvalidExposureDateException();
         }
@@ -47,7 +49,7 @@ public class AdvertisingStatusStrategy implements StatusStrategy {
 
     @Override
     public void validateExpiryDate(Advertisement advertisement, LocalDateTime expiryDate, LocalDateTime exposureDate) {
-        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime current = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime originExposureDate = advertisement.getExposureDate();
         LocalDateTime originExpiryDate = advertisement.getExpiryDate();
 
@@ -55,9 +57,9 @@ public class AdvertisingStatusStrategy implements StatusStrategy {
             throw new InvalidExpiryDateException();
         }
 
-        if(expiryDate.isEqual(exposureDate) || expiryDate.isBefore(exposureDate)
-                || expiryDate.isBefore(originExposureDate)
-                || expiryDate.isEqual(originExposureDate)) {
+        if(expiryDate.isEqual(exposureDate)
+                || expiryDate.isBefore(exposureDate)
+                || !expiryDate.isAfter(originExposureDate)) {
             throw new InvalidExpiryDateException();
         }
     }

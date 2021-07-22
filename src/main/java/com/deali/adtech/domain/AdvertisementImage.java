@@ -74,6 +74,10 @@ public class AdvertisementImage {
         return name + "." + extension;
     }
 
+    public void editName(String name) {
+        this.name = name;
+    }
+
     protected void splitNameAndExtension(String fileName) {
         if(fileName == null || fileName.trim().length()==0) {
             throw new ImageUploadFailureException();

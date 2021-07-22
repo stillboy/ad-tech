@@ -80,13 +80,4 @@ public class AdvertisementSearchDaoUnitTest {
                 .hasSize(size);
     }
 
-    @Test
-    @DisplayName("소재 상세 정보 조회 성공 테스트")
-    public void find_advertisement_by_id() throws Exception {
-        /* given */
-
-        /* when */
-
-        /* then */
-    }
 }

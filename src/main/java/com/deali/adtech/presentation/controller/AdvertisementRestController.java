@@ -5,6 +5,7 @@ import com.deali.adtech.infrastructure.repository.JpaAdvertisementSearchDao;
 import com.deali.adtech.infrastructure.util.mapper.AdvertisementMapper;
 import com.deali.adtech.presentation.dto.*;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

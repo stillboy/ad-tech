@@ -26,7 +26,7 @@ public class LoggingAspect {
             pointcut = "@annotation(com.deali.adtech.infrastructure.util.annotation.AdvertisementExposed)",
             returning = "exposedList")
     public void writeAdvertisementExposedLog(List<ResponseCreative> exposedList) {
-        exposedList.forEach( advertisement -> {
+        exposedList.forEach(advertisement -> {
             ExposedLog log = logMapper.toLog(advertisement);
             exposedLogRepository.save(log);
         });

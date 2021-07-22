@@ -2,15 +2,13 @@ package com.deali.adtech.presentation.controller;
 
 import com.deali.adtech.application.AdvertisementPoolService;
 import com.deali.adtech.domain.AdvertisementDocument;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -60,6 +58,7 @@ public class AdvertisementPoolRestControllerTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("상위 10개 소재 노출 성공 테스트")
     public void get_top_10_advertisement_success_test() throws Exception {
         /* given */

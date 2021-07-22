@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
     //Advertisement
-    INVALID_EXPOSURE_DATE(400, "A001", "시작 일자는 현재 시간 이전이거나 같을 수 없습니다."),
+    INVALID_EXPOSURE_DATE(400, "A001", "시작 일자는 현재 시간 이전일 수 없습니다."),
     INVALID_EXPIRY_DATE(400, "A002", "만료 일자는 광고 시작 일자 혹은 현재 시간 이전일 수 없습니다."),
     IMAGE_UPLOAD_FAIL(500, "A003", "이미지 업로드에 실패했습니다."),
     INVALID_PARAMETERS(400, "A004", "입력값이 잘못되었습니다. 다시 입력해주세요."),
